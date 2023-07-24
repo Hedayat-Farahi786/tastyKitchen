@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+html, body{
+  font-family: 'Poppins', sans-serif;
+}
+
+.title{
+  font-family: 'Alfa Slab One', cursive;
+}
+
+.text-secondary{
+  color: #333333;
+}
+
+
+.bg-secondary{
+  background: #333333;
+}
+
+/* For desktop view */
+@media (min-width: 768px) {
+  .flip-bg {
+    transform: scaleX(-1);
+    background-position: top right;
+  }
+}
+
+/* For mobile view */
+@media (max-width: 767px) {
+  .flip-bg {
+    transform: scaleX(1);
+    background-position: center;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loading-logo {
+  opacity: 0;
+  animation: fade-in 2s forwards;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  40% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.text-primary{
+  color: #E53935;
+}
