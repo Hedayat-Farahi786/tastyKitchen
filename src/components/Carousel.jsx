@@ -3,7 +3,7 @@ import React from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import banner from "../assets/banner-1.png";
+import banner from "../assets/banner.jpeg";
 import mobileBanner from "../assets/mobile-banner.png";
 
 const Carousel = () => {
@@ -20,25 +20,13 @@ const Carousel = () => {
     <Slider {...settings}>
       <div className="w-full">
         <div
-          className="hidden md:flex h-[70vh] md:h-[80vh] bg-cover bg-left relative"
+          className="flex h-[90vh] md:h-[90vh] bg-cover bg-center relative"
           style={{ backgroundImage: `url(${banner})` }}
         >
-          <div className="h-full w-full bg-black bg-opacity-10 flex flex-col items-start px-8 pt-20 md:pt-32 md:px-44">
-            {/* <p className="text-base text-white">Welcome to</p> */}
-            <div className="title text-5xl md:text-8xl font-black mb-4 uppercase flex flex-col space0"><span className='text-[#E53935]'>tasty</span> <span className='text-[#ffc700]'>kitchen</span> <span className='text-white'>München</span></div>
-            <a href="#" className="text-xs md:text-base mt-2 md:mt-5 text-white border-2 border-white font-semibold py-1 px-3 md:py-3 md:px-6 rounded md:rounded-lg hover:bg-white hover:text-black transition-all duration-300">
-              Order Now!
-            </a>
-          </div>
-        </div>
-        <div
-          className="flex md:hidden h-[70vh] md:h-[80vh] bg-cover bg-top-center relative"
-          style={{ backgroundImage: `url(${mobileBanner})` }}
-        >
-          <div className="h-full w-full bg-black bg-opacity-10 flex flex-col items-start px-8 pt-10 md:pt-32 md:px-44">
-            {/* <p className="text-base text-white">Welcome to</p> */}
-            <div className="title text-5xl md:text-8xl font-black mb-4 uppercase flex flex-col space0"><span className='text-[#E53935]'>tasty</span> <span className='text-[#ffc700]'>kitchen</span> <span className='text-white'>München</span></div>
-            <a href="#" className="text-xs md:text-base mt-2 md:mt-5 text-white border-2 border-white font-semibold py-1 px-3 md:py-3 md:px-6 rounded md:rounded-lg hover:bg-white hover:text-black transition-all duration-300">
+          <div className="h-full w-full bg-gradient-to-r from-black flex flex-col items-start px-8 pt-32 md:px-32">
+            <div className="title text-8xl md:text-9xl font-black mb-4 flex flex-col text-white">Tasty <br /> <span className='borderTitle'>Kitchen</span> <br /></div>
+            <p className="text-base text-white font-semibold">Delicious dishes at your fingertips – it's time to eat, relax, and enjoy!</p>
+            <a href="#" className="text-base md:text-base mt-5 text-white bg-[#E53935] font-semibold py-2 px-4 md:py-3 md:px-6 rounded md:rounded-lg hover:bg-white hover:text-black transition-all duration-300">
               Order Now!
             </a>
           </div>

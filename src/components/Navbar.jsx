@@ -11,7 +11,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="w-11/12 mx-auto">
+        <nav className="w-full px-20 bg-transparent shadow-md">
             <div className="flex justify-between items-center py-4">
                 {/* Left side - Logo */}
                 <div className="flex justify-start">
