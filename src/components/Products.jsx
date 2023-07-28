@@ -1,11 +1,30 @@
-import React from "react";
+import { useDispatch } from "react-redux";
+import ProductCard from "./ProductCard";
+import {
+  resetTopping,
+  setExtras,
+  setIsModalOpen,
+  setSelectedOption,
+  setSelectedProduct,
+  setTotalPrice,
+} from "../store/productSlice";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import NoProducts from "../assets/productNoResult.png";
 
 const Products = () => {
   const items = [
     {
+      category: "All",
+      menuId: 0,
+      products: [],
+    },
+    {
       category: "Pizza",
+      menuId: 1,
       products: [
         {
+            id: 1000,
           name: "Salami Pizza",
           description: "Tomato sauce, Cheese, and Salami",
           image:
@@ -17,9 +36,10 @@ const Products = () => {
             { size: "Family, Ø 46cm x 33cm", price: 17.9 },
             { size: "Party, Ø 60cm x 40cm", price: 19.9 },
           ],
-          menuId: 0,
+          menuId: 1,
         },
         {
+            id: 1001,
           name: "Funghi Pizza",
           description: "Tomato sauce, Cheese, and Mushroom",
           image:
@@ -31,14 +51,16 @@ const Products = () => {
             { size: "Family, Ø 46cm x 33cm", price: 17.9 },
             { size: "Party, Ø 60cm x 40cm", price: 19.9 },
           ],
-          menuId: 0,
+          menuId: 1,
         },
       ],
     },
     {
       category: "Burgers",
+      menuId: 2,
       products: [
         {
+            id: 2000,
           name: "Chicken Burger",
           description: "Crispy Chicken, Salad, Mayonaise, Totmato and Onion",
           image:
@@ -49,9 +71,10 @@ const Products = () => {
             { size: "Brioche bun", price: 7.9 },
             { size: "Wholegrain bun", price: 7.9 },
           ],
-          menuId: 1,
+          menuId: 2,
         },
         {
+            id: 2001,
           name: "Cheese Burger",
           description:
             "Beef, tomatoes, lettuce, burger sauce, onions, pickles and cheddar cheese",
@@ -63,20 +86,113 @@ const Products = () => {
             { size: "Brioche bun", price: 7.9 },
             { size: "Wholegrain bun", price: 7.9 },
           ],
-          menuId: 1,
+          menuId: 2,
         },
       ],
     },
   ];
 
+  const [activeMenu, setActiveMenu] = useState(0);
+
+  const dispatch = useDispatch();
+
+  const handleModalOpen = (product) => {
+    if (product.options.length === 0) {
+      alert("No option");
+    } else {
+      dispatch(setSelectedProduct(product));
+      dispatch(setSelectedOption(product.options[0]));
+      dispatch(resetTopping([]));
+      dispatch(setTotalPrice(product.options[0].price));
+      dispatch(setExtras(product));
+      dispatch(setIsModalOpen(true));
+    }
+  };
+
+  const handleMenuChange = (id) => {
+    setActiveMenu(id);
+  };
+
   return (
-    <div>
-      <div className="flex px-20 py-10 space-x-3">
+    <div className="w-full">
+      <div className="flex px-6 md:px-20 space-x-3 pt-24 md:pt-28">
         {items.map((item, i) => (
-          <div key={i} className="border rounded-full px-4 py-1 border-black text-sm cursor-pointer">
+          <div
+            onClick={() => handleMenuChange(item.menuId)}
+            key={i}
+            className={`
+            transition-all duration-200 linear border rounded-full px-4 py-1 border-gray-300 text-sm cursor-pointer ${
+              item.menuId === activeMenu
+                ? "bg-red-500 text-white font-bold"
+                : ""
+            }
+            `}
+          >
             <p>{item.category}</p>
           </div>
         ))}
+      </div>
+
+      <div className="w-full px-6 md:px-20 mb-20">
+        <AnimatePresence>
+          {items.map(
+            (item, i) =>
+              (activeMenu === 0 || item.menuId === activeMenu) && (
+                <>
+                  {item.category !== "All" && (
+                    <div className="mt-10">
+                      <div className="flex items-center justify-between">
+                        <p className="text-primary font-semibold text-xl">
+                          {item.category}
+                        </p>
+                        <p className="text-gray-500 text-sm">
+                          {item.products.length} items
+                        </p>
+                      </div>
+                      <div className="w-full h-[1px] bg-gray-300 mb-5"></div>
+                    </div>
+                  )}
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className=" flex flex-wrap md:grid gap-5 md:gap-14"
+                    style={{
+                      gridTemplateColumns:
+                        "repeat(auto-fill, minmax(300px, 1fr))", // Responsive column sizing
+                    }}
+                  >
+                    {item.products.length > 0
+                      ? item?.products.map((item, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            <ProductCard
+                              product={item}
+                              onChooseOptions={() => handleModalOpen(item)}
+                              productsView={true}
+                            />
+                          </motion.div>
+                        ))
+                      : item.category !== "All" && (
+                          <div className="flex flex-col space-y-2 mt-5 items-center justify-center w-full">
+                            <img
+                              src={NoProducts}
+                              className="w-20"
+                              alt="No items"
+                            />
+                            <p className="text-gray-500 text-sm">
+                              No items Found
+                            </p>
+                          </div>
+                        )}
+                  </motion.div>
+                </>
+              )
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
