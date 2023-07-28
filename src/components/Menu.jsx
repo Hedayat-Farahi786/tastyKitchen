@@ -54,7 +54,7 @@ const Menu = () => {
         { size: "Brioche bun", price: 7.9 },
         { size: "Wholegrain bun", price: 7.9 },
       ],
-      menuId: 1,
+      menuId: 3,
     },
     {
       id: 2001,
@@ -69,15 +69,17 @@ const Menu = () => {
         { size: "Brioche bun", price: 7.9 },
         { size: "Wholegrain bun", price: 7.9 },
       ],
-      menuId: 1,
+      menuId: 3,
     },
     {
       name: "Chicken Nuggets 10x",
       description: "Tasty 10-piece chicken nuggets, Finger-licking good!",
       image:
         "https://images.unsplash.com/photo-1562967914-608f82629710?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1173&q=80",
-      options: [],
-      menuId: 2,
+      options: [
+        {size: "Regular 10x", price: 5}
+      ],
+      menuId: 6,
     },
   ];
 
@@ -99,8 +101,8 @@ const Menu = () => {
   return (
     <div id="menu-section" className="flex flex-wrap gap-4 justify-center my-4 mb-10">
       <div className="w-full flex flex-col items-center justify-center space-y-2 my-8">
-        <p className="text-primary font-bold text-4xl">Our top three meals</p>
-        <p className="font-semibold">Try our three best meals today.</p>
+        <p className="text-primary font-bold text-2xl md:text-4xl text-center">Unsere Top drei Gerichte</p>
+        <p className="font-semibold text-center text-xs md:text-base">Probieren Sie heute unsere drei top Gerichte.</p>
       </div>
       {products.map((product, i) => (
         <ProductCard

@@ -10,11 +10,12 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, toggleCart } from "../store/cart";
 import noProducts from "../assets/productNoResult.png";
+import { Tooltip } from "flowbite-react";
 
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0); // Add this state
-  const [isHomeRoute, setIsHomeRoute] = useState(true); // Initialize as true since the Navbar is displayed on the home route initially
+  const [isHomeRoute, setIsHomeRoute] = useState(true); // Initialize as true since the Navbar is displayed on the Startseite route initially
 
   const location = useLocation();
 
@@ -47,9 +48,6 @@ const Navbar = () => {
 
     return total;
   };
-
-
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,15 +83,15 @@ const Navbar = () => {
 
         {/* Middle - Links */}
         <div
-          className={`hidden md:flex space-x-10 text-sm ${
+          className={`hidden md:flex space-x-10 text-md font-semibold ${
             !isHomeRoute || scrollPosition > 20 ? "" : "text-white"
           }`}
         >
           <Link to="/" className="hover:text-gray-400">
-            Home
+            Startseite
           </Link>
           <Link to="/products" className="hover:text-gray-400">
-            Products
+          Produkte
           </Link>
           {/* <ScrollLink
             to="testimonials-section"
@@ -109,7 +107,7 @@ const Navbar = () => {
             duration={500}
             offset={0}
           >
-            <Link to="#">Contact</Link>
+            <Link to="/contact">Kontakt</Link>
           </ScrollLink>
         </div>
 
@@ -239,7 +237,7 @@ const Navbar = () => {
               activeClassName="text-white bg-[#e53935]"
               className="block rounded px-4 py-1"
             >
-              Home
+              Startseite
             </NavLink>
             <div className="w-full h-[1px] bg-gray-200"></div>
             <NavLink
@@ -248,7 +246,7 @@ const Navbar = () => {
               className="block rounded px-4 py-1"
               onClick={handleMenuToggle}
             >
-              Products
+              Produkte
             </NavLink>
             {/* <div className="w-full h-[1px] bg-gray-200"></div>
 
@@ -281,7 +279,7 @@ const Navbar = () => {
                 className="block rounded px-4 py-1"
                 onClick={handleMenuToggle}
               >
-                Contact
+                Kontakt
               </NavLink>
             </ScrollLink>
           </div>
@@ -298,7 +296,7 @@ const Navbar = () => {
           className="bg-white shadow-xl p-5 space-y-1 fixed top-0 right-0 w-4/6 md:w-3/12 z-50 h-screen"
         >
           <div className="w-full flex items-center justify-between">
-            <p className="font-semibold text-xl">Your Basket</p>
+            <p className="font-semibold text-xl">Warenkorb</p>
 
             <svg
               onClick={handleCartToggle}
@@ -339,6 +337,18 @@ const Navbar = () => {
                           <p className="text-xs text-gray-600">
                             {item.price.toFixed(2)}€
                           </p>
+                          {item.extras.length > 0 && (
+                            <Tooltip
+                              content={item.extras
+                                .map((extra) => extra.name)
+                                .join(", ")}
+                              style="light"
+                            >
+                              <p className="text-[8px] cursor-pointer md:text-[10px] text-primary underline">
+                                Mit extras
+                              </p>
+                            </Tooltip>
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-col items-end justify-between">
@@ -352,7 +362,9 @@ const Navbar = () => {
                           strokeWidth="1.5"
                           stroke="currentColor"
                           className="w-4 h-4 text-red-600 cursor-pointer"
-                          onClick={() => dispatch(removeFromCart(item.product.id))}
+                          onClick={() =>
+                            dispatch(removeFromCart({productId: item.product.id, extras: item.extras}))
+                          }
                         >
                           <path
                             strokeLinecap="round"
@@ -368,25 +380,43 @@ const Navbar = () => {
               </div>
 
               <div className="flex items-center justify-between mt-4">
-                <p className="uppercase font-medium">Total</p>
+                <p className="uppercase font-medium">Gesamt</p>
                 <p className="text-xl text-primary font-semibold">
                   {getCartTotal(cart)}€
                 </p>
               </div>
 
-              <div onClick={handleCartToggle} className="w-full flex items-center justify-center space-x-2 bg-[#e53935] hover:bg-[#ca211f] cursor-pointer transition-all duration-200 linear text-white py-2 rounded-md font-medium mt-10">
-                <p>Continue</p>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-</svg>
-
+              <div
+                onClick={handleCartToggle}
+                className="w-full flex items-center justify-center space-x-2 bg-[#e53935] hover:bg-[#ca211f] cursor-pointer transition-all duration-200 linear text-white py-2 rounded-md font-medium mt-10"
+              >
+                <p>Weiter</p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                  />
+                </svg>
               </div>
             </div>
           ) : (
             <div className="w-full h-4/6 flex flex-col items-center justify-center">
-              <img src={noProducts} alt="No Items" />
-              <p>No items in basket</p>
-              <Link onClick={handleCartToggle} to="/products" className="mt-5 border px-4 py-1 rounded border-[#E53935] text-primary transition-all duration-200 linear cursor-pointer hover:bg-[#E53935] hover:text-white">
+              <img src={noProducts} alt="No Items" className="w-40" />
+              <p className="font-semibold">Fill your shopping cart</p>
+  <p className="text-xs text-gray-500 text-center my-2"> Add some delicious dishes from the menu and order your food. </p>
+              <Link
+                onClick={handleCartToggle}
+                to="/products"
+                className="mt-5 border px-4 py-1 rounded border-[#E53935] text-primary transition-all duration-200 linear cursor-pointer hover:bg-[#E53935] hover:text-white"
+              >
                 Add Items
               </Link>
             </div>

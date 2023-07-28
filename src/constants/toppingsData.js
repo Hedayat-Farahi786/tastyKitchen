@@ -151,3 +151,24 @@ export const burgerToppings = [
     price: 0.6,
   },
 ];
+
+
+
+export const saladDressings = [
+  {
+    name: "Essig-Balsamico-Dressing",
+    price: 1.00
+  },
+  {
+    name: "French-Dressing",
+    price: 1.00
+  },
+  {
+    name: "Joghurt-Dressing",
+    price: 1.00
+  },
+  {
+    name: "Kräuter-Dressing",
+    price: 1.00
+  },
+]

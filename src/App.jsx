@@ -3,9 +3,8 @@ import Navbar from "./components/Navbar";
 import { Flowbite } from "flowbite-react";
 import LoadingPage from "./components/LoadingPage";
 import Products from "./components/Products";
+import Contact from "./components/Contact";
 import { useEffect, useState } from "react";
-import Menu from "./components/Menu";
-import Carousel from "./components/Carousel";
 import { useDispatch, useSelector } from "react-redux";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -14,12 +13,12 @@ import {
   setIsModalOpen,
   setQuantity,
   setSelectedOption,
-  setSelectedToppings,
   setTotalPrice,
 } from "./store/productSlice";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Landing from "./components/Landing";
 import { addToCart } from "./store/cart";
+import toast, { Toaster } from "react-hot-toast";
 const customTheme = {
   button: {
     color: {
@@ -60,8 +59,16 @@ const App = () => {
   };
 
   const handleAddToBasket = () => {
-    dispatch(addToCart({product: selectedProduct, price: selectedOption.price, quantity}))
+    dispatch(
+      addToCart({
+        product: selectedProduct,
+        extras: selectedToppings,
+        price: totalPrice,
+        quantity,
+      })
+    );
     dispatch(setIsModalOpen(false));
+    toast.success(`${selectedProduct.name} wurde dem Korb hinzugefügt!`);
   };
 
   const handleLoadingComplete = (complete) => {
@@ -81,11 +88,13 @@ const App = () => {
       {isLoadingComplete ? (
         <div className="w-full overflow-x-hidden relative">
           <Router>
+            <Toaster />
             <Flowbite theme={{ theme: customTheme }}>
               <Navbar />
               <Switch>
                 <Route exact path="/" component={Landing} />
                 <Route path="/products" component={Products} />
+                <Route path="/contact" component={Contact} />
               </Switch>
             </Flowbite>
           </Router>
