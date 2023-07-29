@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setSelectedProduct,
   setSelectedOption,
@@ -9,6 +9,8 @@ import {
   resetTopping,
 } from "../store/productSlice";
 import ProductCard from "./ProductCard";
+import toast from "react-hot-toast";
+import { addToCart } from "../store/cart";
 
 const Menu = () => {
   const products = [
@@ -83,11 +85,26 @@ const Menu = () => {
     },
   ];
 
+  const selectedToppings = useSelector(
+    (state) => state.product.selectedToppings
+  );
+
   const dispatch = useDispatch();
 
   const handleModalOpen = (product) => {
     if (product.options.length === 0) {
       alert("No option");
+    } else if(product.options.length === 1 && selectedToppings.length === 0) {
+      dispatch(
+        addToCart({
+          product: product,
+          extras: selectedToppings,
+          price: product.options[0].price,
+          quantity: 1,
+        })
+      );
+      dispatch(setIsModalOpen(false));
+      toast.success(`${product.name} wurde dem Korb hinzugefügt!`);
     } else {
       dispatch(setSelectedProduct(product));
       dispatch(setSelectedOption(product.options[0]));
