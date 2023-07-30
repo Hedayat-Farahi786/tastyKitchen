@@ -94,7 +94,7 @@ const GetInTouch = () => {
   };
 
   return (
-    <section id="getInTouch" className="w-11/12 mx-auto md:py-20 mb-32">
+    <section id="getInTouch" className="w-11/12 mx-auto pt-[10vh] md:py-20 mb-32">
       <div className="container mx-auto px-4">
         <div className="flex flex-col-reverse md:flex-row md:space-x-20 items-center">
           <motion.div
@@ -118,7 +118,7 @@ const GetInTouch = () => {
               <div className="flex flex-col md:flex-row space-x-0 md:space-x-3 space-y-4 md:space-y-0 w-full">
                 <div className="w-full">
                   <div className="mb-2 block">
-                    <Label htmlFor="email" value="Email" />
+                    <Label htmlFor="email" value="E-mail" />
                   </div>
                   <TextInput
                     id="email"
@@ -128,13 +128,13 @@ const GetInTouch = () => {
                     type="email"
                     name="email"
                     color={errors.email ? "failure" : ""}
-                    helperText={errors.email && <span>Email is required!</span>}
+                    helperText={errors.email && <span>E-mail ist erforderlich</span>}
                     className="w-full"
                   />
                 </div>
                 <div className="w-full">
                   <div className="mb-2 block">
-                    <Label htmlFor="name" value="Name" />
+                    <Label htmlFor="name" value="Vor- und Zuname" />
                   </div>
                   <TextInput
                     id="name"
@@ -143,7 +143,7 @@ const GetInTouch = () => {
                     shadow
                     type="text"
                     color={errors.name ? "failure" : ""}
-                    helperText={errors.name && <span>Name is required!</span>}
+                    helperText={errors.name && <span>Vollständiger Name ist erforderlich</span>}
                     name="name"
                     className="w-full"
                   />
@@ -151,7 +151,7 @@ const GetInTouch = () => {
               </div>
               <div>
                 <div className="mb-2 block">
-                  <Label htmlFor="message" value="Message" />
+                  <Label htmlFor="message" value="Nachricht" />
                 </div>
                 <Textarea
                   id="message"
@@ -160,7 +160,7 @@ const GetInTouch = () => {
                   shadow
                   color={errors.message ? "failure" : ""}
                   helperText={
-                    errors.message && <span>Message is required!</span>
+                    errors.message && <span>Nachricht is erforderlich</span>
                   }
                   name="message"
                   rows={6}

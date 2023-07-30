@@ -1,4 +1,6 @@
 import Navbar from "./components/Navbar";
+import 'leaflet/dist/leaflet.css';
+// import 'react-leaflet-markercluster/dist/styles.min.css'; // If you're using marker clusters
 
 import { Flowbite } from "flowbite-react";
 import LoadingPage from "./components/LoadingPage";
@@ -19,6 +21,8 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Landing from "./components/Landing";
 import { addToCart } from "./store/cart";
 import toast, { Toaster } from "react-hot-toast";
+import Checkout from "./components/Checkout";
+import Final from "./components/Final";
 const customTheme = {
   button: {
     color: {
@@ -95,6 +99,8 @@ const App = () => {
                 <Route exact path="/" component={Landing} />
                 <Route path="/products" component={Products} />
                 <Route path="/contact" component={Contact} />
+                <Route path="/checkout" component={Checkout} />
+                <Route path="/done" component={Final} />
               </Switch>
             </Flowbite>
           </Router>

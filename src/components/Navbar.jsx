@@ -69,7 +69,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`w-full px-6 md:px-20 shadow-md fixed top-0 z-50 ${
+      className={`w-full h-10vh px-6 md:px-20 shadow-md fixed top-0 z-50 ${
         !isHomeRoute || scrollPosition > 20 ? "bg-white" : "bg-transparent"
       }`}
     >
@@ -91,7 +91,7 @@ const Navbar = () => {
             Startseite
           </Link>
           <Link to="/products" className="hover:text-gray-400">
-          Produkte
+            Produkte
           </Link>
           {/* <ScrollLink
             to="testimonials-section"
@@ -363,7 +363,12 @@ const Navbar = () => {
                           stroke="currentColor"
                           className="w-4 h-4 text-red-600 cursor-pointer"
                           onClick={() =>
-                            dispatch(removeFromCart({productId: item.product.id, extras: item.extras}))
+                            dispatch(
+                              removeFromCart({
+                                productId: item.product.id,
+                                extras: item.extras,
+                              })
+                            )
                           }
                         >
                           <path
@@ -386,32 +391,37 @@ const Navbar = () => {
                 </p>
               </div>
 
-              <div
-                onClick={handleCartToggle}
-                className="w-full flex items-center justify-center space-x-2 bg-[#e53935] hover:bg-[#ca211f] cursor-pointer transition-all duration-200 linear text-white py-2 rounded-md font-medium mt-10"
-              >
-                <p>Weiter</p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-5 h-5"
+              <Link to="/checkout">
+                <div
+                  onClick={handleCartToggle}
+                  className="w-full flex items-center justify-center space-x-2 bg-[#e53935] hover:bg-[#ca211f] cursor-pointer transition-all duration-200 linear text-white py-2 rounded-md font-medium mt-10"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                  />
-                </svg>
-              </div>
+                  <p>Weiter</p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
+                  </svg>
+                </div>
+              </Link>
             </div>
           ) : (
             <div className="w-full h-4/6 flex flex-col items-center justify-center">
               <img src={noProducts} alt="No Items" className="w-40" />
               <p className="font-semibold">Fill your shopping cart</p>
-  <p className="text-xs text-gray-500 text-center my-2"> Add some delicious dishes from the menu and order your food. </p>
+              <p className="text-xs text-gray-500 text-center my-2">
+                {" "}
+                Add some delicious dishes from the menu and order your food.{" "}
+              </p>
               <Link
                 onClick={handleCartToggle}
                 to="/products"

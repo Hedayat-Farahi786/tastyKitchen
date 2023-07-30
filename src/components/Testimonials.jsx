@@ -100,7 +100,7 @@ const Testimonials = () => {
   return (
     <section
       id="testimonials"
-      className="mx-auto max-w-md md:max-w-5xl pt-10 mt-10 mb-32"
+      className="mx-auto max-w-md md:max-w-5xl pt-10 mt-10 mb-20"
       ref={ref}
     >
       <h2 className="text-primary text-3xl md:text-4xl font-bold text-center mb-5 md:mb-16">
