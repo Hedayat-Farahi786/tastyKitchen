@@ -123,7 +123,7 @@ const GetInTouch = () => {
                   <TextInput
                     id="email"
                     {...register("email", { required: true })}
-                    placeholder="John@doe.com..."
+                    placeholder="Max@mustermann.com..."
                     shadow
                     type="email"
                     name="email"
@@ -139,7 +139,7 @@ const GetInTouch = () => {
                   <TextInput
                     id="name"
                     {...register("name", { required: true })}
-                    placeholder="John Doe..."
+                    placeholder="Max Mustermann..."
                     shadow
                     type="text"
                     color={errors.name ? "failure" : ""}
@@ -156,7 +156,7 @@ const GetInTouch = () => {
                 <Textarea
                   id="message"
                   {...register("message", { required: true })}
-                  placeholder="Your message..."
+                  placeholder="Ihre Nachricht..."
                   shadow
                   color={errors.message ? "failure" : ""}
                   helperText={
@@ -174,7 +174,7 @@ const GetInTouch = () => {
                 {loading && (
                   <AiOutlineLoading3Quarters className="mr-3 h-4 w-4 animate-spin" />
                 )}
-                <p>Send</p>
+                <p>Senden</p>
                 <IoMdSend className="ml-3 h-4 w-4" />
               </button>
             </form>

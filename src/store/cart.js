@@ -47,6 +47,9 @@ const cartSlice = createSlice({
         }
       }
     },
+    resetCart: (state) => {
+      state.cart = [];
+    },
     toggleCart: (state) => {
       state.showCart = !state.showCart;
     },
@@ -75,6 +78,6 @@ function areExtrasEqual(extras1, extras2) {
 }
 
 
-export const { addToCart, removeFromCart, toggleCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, resetCart, toggleCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

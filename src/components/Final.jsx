@@ -4,14 +4,16 @@ import MapWithDistance from './MapWithDistance';
 const Final = () => {
   // Mock restaurant location
   const restaurantLocation = { lat: 48.217800, lng: 11.525440 }; // Replace LATITUDE and LONGITUDE with the actual coordinates of your restaurant.
+  const restaurant = [48.217800, 11.525440]; // Replace LATITUDE and LONGITUDE with the actual coordinates of your restaurant.
 
   // User's location (you can obtain this using the Geolocation API as shown in the previous response)
   const userLocation = { lat: 48.223590, lng: 11.555860 }; // Replace USER_LATITUDE and USER_LONGITUDE with the actual coordinates of the user's location.
+  const user = [48.133220, 11.531990]; // Replace USER_LATITUDE and USER_LONGITUDE with the actual coordinates of the user's location.
 
   return (
-    <div className="pt-[10vh] w-full">
+    <div className="pt-[8vh] w-full">
       {/* Map showing the distance between the restaurant and user's location */}
-      <MapWithDistance origin={userLocation} destination={restaurantLocation} />
+      <MapWithDistance customerLocation={user} restaurantLocation={restaurant} />
 
       {/* Rest of your Final page content */}
       {/* ... */}

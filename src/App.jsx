@@ -92,7 +92,7 @@ const App = () => {
       {isLoadingComplete ? (
         <div className="w-full overflow-x-hidden relative">
           <Router>
-            <Toaster />
+            <Toaster  position="bottom-center" />
             <Flowbite theme={{ theme: customTheme }}>
               <Navbar />
               <Switch>

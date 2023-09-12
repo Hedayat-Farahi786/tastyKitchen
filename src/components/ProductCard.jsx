@@ -8,7 +8,7 @@ const ProductCard = ({ product, onChooseOptions, productsView }) => {
     <motion.div
       onClick={onChooseOptions}
       className={`md:w-72 ${
-        isProductsView ? "w-44" : "w-80"
+        isProductsView ? "w-36" : "w-80"
       } cursor-pointer flex flex-col items-start justify-between shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:shadow-xl`}
     >
       <div className="w-full">
@@ -16,7 +16,7 @@ const ProductCard = ({ product, onChooseOptions, productsView }) => {
         src={product.image}
         alt={product.name}
         className={`${
-          isProductsView ? "h-40" : "h-56"
+          isProductsView ? "h-36" : "h-56"
         } md:h-56 max-h-72 w-full object-cover`}
       />
       <div className="px-4 pt-4 w-full">

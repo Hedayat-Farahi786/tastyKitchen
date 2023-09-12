@@ -246,41 +246,41 @@ const Products = () => {
         },
       ],
     },
-    // {
-    //   category: "Burgers",
-    //   menuId: 3,
-    //   products: [
-    //     {
-    //       id: 2000,
-    //       name: "Chicken Burger",
-    //       description: "Crispy Chicken, Salad, Mayonaise, Totmato and Onion",
-    //       image:
-    //         "https://www.recipetineats.com/wp-content/uploads/2019/08/Avocado-Chicken-Burgers_9.jpg",
-    //       optionsTitle: "Your bun",
-    //       options: [
-    //         { size: "Sesame bun", price: 6.9 },
-    //         { size: "Brioche bun", price: 7.9 },
-    //         { size: "Wholegrain bun", price: 7.9 },
-    //       ],
-    //       menuId: 2,
-    //     },
-    //     {
-    //       id: 2001,
-    //       name: "Cheese Burger",
-    //       description:
-    //         "Beef, tomatoes, lettuce, burger sauce, onions, pickles and cheddar cheese",
-    //       image:
-    //         "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=999&q=80",
-    //       optionsTitle: "Your bun",
-    //       options: [
-    //         { size: "Sesame bun", price: 6.9 },
-    //         { size: "Brioche bun", price: 7.9 },
-    //         { size: "Wholegrain bun", price: 7.9 },
-    //       ],
-    //       menuId: 2,
-    //     },
-    //   ],
-    // },
+    {
+      category: "Burgers",
+      menuId: 3,
+      products: [
+        {
+          id: 2000,
+          name: "Chicken Burger",
+          description: "Crispy Chicken, Salad, Mayonaise, Totmato and Onion",
+          image:
+            "https://www.recipetineats.com/wp-content/uploads/2019/08/Avocado-Chicken-Burgers_9.jpg",
+          optionsTitle: "Your bun",
+          options: [
+            { size: "Sesame bun", price: 6.9 },
+            { size: "Brioche bun", price: 7.9 },
+            { size: "Wholegrain bun", price: 7.9 },
+          ],
+          menuId: 3,
+        },
+        {
+          id: 2001,
+          name: "Cheese Burger",
+          description:
+            "Beef, tomatoes, lettuce, burger sauce, onions, pickles and cheddar cheese",
+          image:
+            "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=999&q=80",
+          optionsTitle: "Your bun",
+          options: [
+            { size: "Sesame bun", price: 6.9 },
+            { size: "Brioche bun", price: 7.9 },
+            { size: "Wholegrain bun", price: 7.9 },
+          ],
+          menuId: 3,
+        },
+      ],
+    },
   ];
 
   const [activeMenu, setActiveMenu] = useState(0);
@@ -347,7 +347,7 @@ const Products = () => {
                     key={i}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className=" flex flex-wrap md:grid gap-5 md:gap-14"
+                    className=" flex flex-wrap md:grid gap-5 md:gap-14 justify-around"
                     style={{
                       gridTemplateColumns:
                         "repeat(auto-fill, minmax(300px, 1fr))", // Responsive column sizing

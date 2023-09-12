@@ -8,8 +8,9 @@ import paypalIcon from "../assets/paypal.png";
 import creditIcon from "../assets/credit.png";
 import giroIcon from "../assets/giro.png";
 import { useDispatch, useSelector } from "react-redux";
-import { removeFromCart } from "../store/cart";
+import { removeFromCart, resetCart } from "../store/cart";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { addOrder } from "../store/order";
 const payments = [
   {
     name: "Barzahlung",
@@ -46,8 +47,10 @@ const Checkout = () => {
   const [selectedPayment, setSelectedPayment] = useState(payments[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
   const history = useHistory();
+
+  const order = useSelector((state) => state.order.order);
+
 
   const {
     register,
@@ -56,7 +59,13 @@ const Checkout = () => {
     reset,
   } = useForm();
   const onSubmit = (data) => {
-    console.log(data);
+    data.products = cart;
+    data.totalPrice = getCartTotal(cart);
+    data.payment = selectedPayment.name;
+    data.time = new Date().toLocaleString();
+    dispatch(addOrder(data));
+    console.log("order:", order);
+    dispatch(resetCart());
     history.push('/done');
   };
 
@@ -85,7 +94,7 @@ const Checkout = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="checkout__left w-full md:w-8/12 py-5 md:py-10"
       >
-        <p className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">Delivery Address</p>
+        <p className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">Lieferadresse</p>
         <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
           <div className="w-full">
             <div className="mb-2 block">
@@ -218,7 +227,7 @@ const Checkout = () => {
             <TextInput
               id="email"
               {...register("email", { required: true })}
-              placeholder="John@doe.com..."
+              placeholder="Max@mustermann.com..."
               shadow
               type="email"
               name="email"
