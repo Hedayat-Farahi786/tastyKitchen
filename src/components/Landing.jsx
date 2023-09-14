@@ -5,6 +5,7 @@ import Services from "./Services";
 import Footer from "./Footer";
 import Testimonials from "./Testimonials";
 import Contact from "./Contact";
+import Products from "./Products";
 
 const Landing = () => {
   return (
@@ -12,6 +13,9 @@ const Landing = () => {
       <Carousel />
       <Menu />
       <Services />
+      {/* <div className="h-[150vh] overflow-y-scroll"> */}
+      <Products dark={true} />
+      {/* </div> */}
       <Testimonials />
       <Contact />
       <Footer />

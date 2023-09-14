@@ -1,5 +1,5 @@
 import { Label, TextInput, Tooltip } from "flowbite-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AnimatePresence, motion } from "framer-motion";
 import cashIcon from "../assets/cash.png";
@@ -59,6 +59,7 @@ const Checkout = () => {
     reset,
   } = useForm();
   const onSubmit = (data) => {
+    localStorage.setItem('formData', JSON.stringify(data));
     data.products = cart;
     data.totalPrice = getCartTotal(cart);
     data.payment = selectedPayment.name;
@@ -73,6 +74,13 @@ const Checkout = () => {
     setSelectedPayment(option);
     setIsModalOpen(false);
   };
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('formData');
+    if (savedData) {
+      reset(JSON.parse(savedData));
+    }
+  }, [reset]);
 
   const dispatch = useDispatch();
 

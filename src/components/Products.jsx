@@ -12,7 +12,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import NoProducts from "../assets/productNoResult.png";
 
-const Products = () => {
+const Products = ({dark}) => {
   const items = [
     {
       category: "Alle",
@@ -305,8 +305,8 @@ const Products = () => {
   };
 
   return (
-    <div className="w-full">
-      <div className="flex px-6 md:px-20 space-x-3 pt-24 md:pt-28">
+    <div className={`w-full ${dark ? 'bg-[#f5f5f5] pb-10 ' : ''}`}>
+      <div className="flex px-6 md:px-20 space-x-3 shadow-inner pt-24 md:pt-28">
         {items.map((item, i) => (
           <div
             onClick={() => handleMenuChange(item.menuId)}

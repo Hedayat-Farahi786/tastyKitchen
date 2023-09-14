@@ -33,7 +33,7 @@ const Carousel = () => {
             </p>
             <Link
               to="/products"
-              className="text-base md:text-base mt-5 text-white bg-[#E53935] font-semibold py-2 px-4 md:py-3 md:px-6 rounded md:rounded-lg hover:bg-white hover:text-black transition-all duration-300"
+              className="text-base md:text-base mt-10 text-white border border-white font-semibold py-2 px-4 md:py-3 md:px-6 rounded md:rounded-lg hover:bg-white hover:text-black transition-all duration-300"
             >
               Jetzt bestellen
             </Link>
