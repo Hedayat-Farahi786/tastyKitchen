@@ -112,7 +112,7 @@ const Final = () => {
               style={borderStyle}
             >
               <div className="font-bold bg-white shadow-lg h-full w-full rounded-full flex flex-col items-center justify-center">
-                <span className="text-xl">{timeLeft}</span>
+                <span className="text-xl">{Math.floor(timeLeft / 60) + 1}</span>
                 <span className="text-xs">min</span>
               </div>
             </div>
@@ -138,7 +138,7 @@ const Final = () => {
             </p>
             <p className="text-sm text-center">
               Deine Bestellung bei Tasty Kitchen ist unterwegs und wird in etwa{" "}
-              {timeLeft} Minuten geliefert.
+              {Math.floor(timeLeft / 60) + 1} Minuten geliefert.
             </p>
           </>
         )}
