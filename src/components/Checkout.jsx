@@ -59,7 +59,7 @@ const Checkout = () => {
     reset,
   } = useForm();
   const onSubmit = (data) => {
-    localStorage.setItem('formData', JSON.stringify(data));
+    // localStorage.setItem('formData', JSON.stringify(data));
     data.products = cart;
     data.totalPrice = getCartTotal(cart);
     data.payment = selectedPayment.name;
@@ -75,12 +75,12 @@ const Checkout = () => {
     setIsModalOpen(false);
   };
 
-  useEffect(() => {
-    const savedData = localStorage.getItem('formData');
-    if (savedData) {
-      reset(JSON.parse(savedData));
-    }
-  }, [reset]);
+  // useEffect(() => {
+  //   const savedData = localStorage.getItem('formData');
+  //   if (savedData) {
+  //     reset(JSON.parse(savedData));
+  //   }
+  // }, [reset]);
 
   const dispatch = useDispatch();
 

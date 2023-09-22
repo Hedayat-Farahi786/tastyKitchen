@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import MapWithDistance from "./MapWithDistance";
 import { toast } from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const Final = () => {
   // Mock restaurant location
@@ -13,6 +14,10 @@ const Final = () => {
   const [timeLeft, setTimeLeft] = useState(initialTime); // Initial time left in seconds
   const [showCheckmark, setShowCheckmark] = useState(true); // Initial state to show the checkmark
   const [done, setDone] = useState(false); // Indicates if the timer is done
+
+  const order = useSelector((state) => state.order.order);
+
+  console.log(order)
 
   useEffect(() => {
     let timer;
