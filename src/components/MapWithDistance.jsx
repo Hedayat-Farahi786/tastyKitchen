@@ -27,33 +27,29 @@ const MapWithDistance = ({ origin, destination }) => {
     <div className="w-full m-0">
       {/* {distance && <p>Distance: {distance} km</p>} */}
       <MapContainer
-        center={[
-          (origin.lat + destination.lat) / 2,
-          (origin.lng + destination.lng) / 2,
-        ]}
-        zoom={13}
-        style={{ width: "100%", height: "300px" }}
-        className="z-40"
-        zoomControl={false}
+        center={[origin.lat, origin.lng]}
+        zoom={14}
+        style={{ width: "100%", height: "400px" }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
         {/* Marker for the restaurant */}
         <Marker position={[destination.lat, destination.lng]}>
-          <Popup>Tasty Kitchen</Popup>
+          <Popup>Restaurant</Popup>
         </Marker>
 
         {/* Marker for the user's location */}
         <Marker position={[origin.lat, origin.lng]}>
-          <Popup>Deine Adresse</Popup>
+          <Popup>User Location</Popup>
         </Marker>
 
         {/* Polyline representing the route */}
         <Polyline
           positions={route}
-          color="#e53935"
+          color="blue"
           pathOptions={{ weight: 4, dashArray: "10 10" }}
         />
       </MapContainer>
