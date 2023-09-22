@@ -9,7 +9,7 @@ import creditIcon from "../assets/credit.png";
 import giroIcon from "../assets/giro.png";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, resetCart } from "../store/cart";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useHistory } from "react-router-dom";
 import { addOrder } from "../store/order";
 const payments = [
   {
