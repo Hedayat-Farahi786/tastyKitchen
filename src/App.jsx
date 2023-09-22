@@ -17,7 +17,7 @@ import {
   setSelectedOption,
   setTotalPrice,
 } from "./store/productSlice";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import Landing from "./components/Landing";
 import { addToCart } from "./store/cart";
 import toast, { Toaster } from "react-hot-toast";
