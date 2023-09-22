@@ -17,7 +17,7 @@ const Final = () => {
 
   const order = useSelector((state) => state.order.order);
 
-  console.log(order)
+  console.log(order);
 
   useEffect(() => {
     let timer;
@@ -55,40 +55,21 @@ const Final = () => {
     )`,
   };
 
-  const hkandleShareClick = async () => {
-    const shareContent = {
-      title: "Verfolgen Sie Ihre Lieferung",
-      text: "Klicken Sie auf den unten stehenden Link, um die Lieferung Ihrer Bestellung zu verfolgen",
-      url: window.location.href, // Get the current URL
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareContent);
-        toast.success(`wurde dem Korb hinzugefügt!`);
-      } else {
-        toast.error(
-          "Die Weitergabefunktion wird in diesem Browser nicht unterstützt. Sie können den Link manuell kopieren."
-        );
-      }
-    } catch (error) {
-      toast.error("Fehler beim Teilen.");
-    }
-  };
   const handleShareClick = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Share this link',
-          text: 'Check out this cool website!',
-          url: window.location.href, // You can replace this with the URL you want to share
+          title: "Verfolgen Sie Ihre Lieferung",
+          text: "Klicken Sie auf den unten stehenden Link, um die Lieferung Ihrer Bestellung zu verfolgen",
+          url: window.location.href,
         });
-        console.log('Link shared successfully');
+        toast.success(`wurde dem Korb hinzugefügt!`);
       } catch (error) {
-        console.error('Error sharing link:', error);
+        toast.error("Fehler beim Teilen.");
       }
     } else {
       // Fallback for browsers that do not support the Web Share API
-      console.log('Web Share API is not supported');
+      console.log("Web Share API is not supported");
     }
   };
 
@@ -131,7 +112,7 @@ const Final = () => {
               style={borderStyle}
             >
               <div className="font-bold bg-white shadow-lg h-full w-full rounded-full flex flex-col items-center justify-center">
-                <span className="text-xl">{Math.floor(timeLeft / 60) + 1}</span>
+                <span className="text-xl">{timeLeft}</span>
                 <span className="text-xs">min</span>
               </div>
             </div>
@@ -157,7 +138,7 @@ const Final = () => {
             </p>
             <p className="text-sm text-center">
               Deine Bestellung bei Tasty Kitchen ist unterwegs und wird in etwa{" "}
-              {Math.floor(timeLeft / 60) + 1} Minuten geliefert.
+              {timeLeft} Minuten geliefert.
             </p>
           </>
         )}
