@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import MapWithDistance from "./MapWithDistance";
 import { toast } from "react-hot-toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleCart } from "../store/cart";
 
 const Final = () => {
   // Mock restaurant location
@@ -17,7 +18,13 @@ const Final = () => {
 
   const order = useSelector((state) => state.order.order);
 
+
+  const dispatch = useDispatch();
+
+  useEffect(()=>{
   console.log(order);
+  },[])
+
 
   useEffect(() => {
     let timer;
@@ -63,7 +70,18 @@ const Final = () => {
           text: "Klicken Sie auf den unten stehenden Link, um die Lieferung Ihrer Bestellung zu verfolgen",
           url: window.location.href,
         });
-        toast.success(`wurde dem Korb hinzugefügt!`);
+        toast.dismiss();
+      toast((t) => (
+        <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
+          <b>Produkt hinzugefügt!</b>
+          <button className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1" onClick={() => {
+            dispatch(toggleCart());
+            toast.dismiss();
+          }}>
+          Warenkorb
+          </button>
+        </span>
+      ));
       } catch (error) {
         toast.error("Fehler beim Teilen.");
       }
@@ -127,8 +145,8 @@ const Final = () => {
               Ihre Bestellung wurde geliefert!
             </p>
             <p className="text-sm text-center">
-              Deine Bestellung bei Tasty Kitchen wurde an Wintersteinstr. 62,
-              80933 München geliefert.
+              Deine Bestellung bei Tasty Kitchen wurde an {order.street},
+              {order.postcode} München geliefert.
             </p>
           </>
         ) : (

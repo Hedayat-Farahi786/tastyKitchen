@@ -10,7 +10,7 @@ import {
 } from "../store/productSlice";
 import ProductCard from "./ProductCard";
 import toast from "react-hot-toast";
-import { addToCart } from "../store/cart";
+import { addToCart, toggleCart } from "../store/cart";
 
 const Menu = () => {
   const products = [
@@ -104,7 +104,18 @@ const Menu = () => {
         })
       );
       dispatch(setIsModalOpen(false));
-      toast.success(`${product.name} wurde dem Korb hinzugefügt!`);
+      toast.dismiss();
+      toast((t) => (
+        <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
+          <b>Produkt hinzugefügt!</b>
+          <button className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1" onClick={() => {
+            dispatch(toggleCart());
+            toast.dismiss();
+          }}>
+          Warenkorb
+          </button>
+        </span>
+      ));
     } else {
       dispatch(setSelectedProduct(product));
       dispatch(setSelectedOption(product.options[0]));

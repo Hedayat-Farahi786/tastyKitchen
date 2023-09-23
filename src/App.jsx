@@ -19,7 +19,7 @@ import {
 } from "./store/productSlice";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import Landing from "./components/Landing";
-import { addToCart } from "./store/cart";
+import { addToCart, toggleCart } from "./store/cart";
 import toast, { Toaster } from "react-hot-toast";
 import Checkout from "./components/Checkout";
 import Final from "./components/Final";
@@ -72,7 +72,18 @@ const App = () => {
       })
     );
     dispatch(setIsModalOpen(false));
-    toast.success(`${selectedProduct.name} wurde dem Korb hinzugefügt!`);
+    toast.dismiss();
+      toast((t) => (
+        <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
+          <b>Produkt hinzugefügt!</b>
+          <button className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1" onClick={() => {
+            dispatch(toggleCart());
+            toast.dismiss();
+          }}>
+          Warenkorb
+          </button>
+        </span>
+      ));
   };
 
   const handleLoadingComplete = (complete) => {

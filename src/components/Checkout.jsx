@@ -1,4 +1,4 @@
-import { Label, TextInput, Tooltip } from "flowbite-react";
+import { Label, TextInput, Textarea, Tooltip } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AnimatePresence, motion } from "framer-motion";
@@ -46,6 +46,7 @@ const payments = [
 const Checkout = () => {
   const [selectedPayment, setSelectedPayment] = useState(payments[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [userLocation, setUserLocation] = useState(null); // Store user's location
 
   const history = useHistory();
 
@@ -58,14 +59,39 @@ const Checkout = () => {
     formState: { errors },
     reset,
   } = useForm();
+
+
+  // const getLocation = () => {
+  //   if ("geolocation" in navigator) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         setUserLocation({ latitude, longitude });
+  //       },
+  //       (error) => {
+  //         console.error("Error getting user's location:", error);
+  //       }
+  //     );
+  //   } else {
+  //     console.error("Geolocation is not available in this browser.");
+  //   }
+  // };
+
+
   const onSubmit = (data) => {
-    // localStorage.setItem('formData', JSON.stringify(data));
+
+    // if (userLocation) {
+    //   // If user's location is available, add it to the form data
+    //   data.latitude = userLocation.latitude;
+    //   data.longitude = userLocation.longitude;
+    // }
+
+    localStorage.setItem('formData', JSON.stringify(data));
     data.products = cart;
     data.totalPrice = getCartTotal(cart);
     data.payment = selectedPayment.name;
     data.time = new Date().toLocaleString();
     dispatch(addOrder(data));
-    console.log("order:", order);
     dispatch(resetCart());
     history.push('/done');
   };
@@ -75,12 +101,18 @@ const Checkout = () => {
     setIsModalOpen(false);
   };
 
-  // useEffect(() => {
-  //   const savedData = localStorage.getItem('formData');
-  //   if (savedData) {
-  //     reset(JSON.parse(savedData));
-  //   }
-  // }, [reset]);
+  useEffect(()=>{
+    if(cart.length === 0){
+      history.goBack();
+    }
+  }, [])
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('formData');
+    if (savedData) {
+      reset(JSON.parse(savedData));
+    }
+  }, [reset]);
 
   const dispatch = useDispatch();
 
@@ -102,46 +134,35 @@ const Checkout = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="checkout__left w-full md:w-8/12 py-5 md:py-10"
       >
+        {/* <div className="flex items-center justify-center">
+          <button
+            type="button"
+            onClick={getLocation}
+            className="bg-primary text-white rounded-xl px-4 py-2 font-semibold"
+          >
+            Get My Location
+          </button>
+        </div> */}
         <p className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">Lieferadresse</p>
         <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
           <div className="w-full">
             <div className="mb-2 block">
-              <Label htmlFor="street" value="Straße" />
+              <Label htmlFor="street" value="Straße und Hausnummer" />
             </div>
             <TextInput
               id="street"
               {...register("street", { required: true })}
-              placeholder="Straßenname eingeben"
+              placeholder="Straße und Hausnummer eingeben"
               shadow
               type="text"
               name="street"
               color={errors.street ? "failure" : ""}
               helperText={
-                errors.street && <span>Straßenname ist erforderlich</span>
+                errors.street && <span>Straße und Hausnummer ist erforderlich</span>
               }
               className="w-full"
             />
           </div>
-          <div className="w-full">
-            <div className="mb-2 block">
-              <Label htmlFor="houseNumber" value="Hausnummer" />
-            </div>
-            <TextInput
-              id="houseNumber"
-              {...register("houseNumber", { required: true })}
-              placeholder="Hausnummer eingeben"
-              shadow
-              type="text"
-              name="houseNumber"
-              color={errors.houseNumber ? "failure" : ""}
-              helperText={
-                errors.houseNumber && <span>Hausnummer ist erforderlich</span>
-              }
-              className="w-full"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
           <div className="w-full">
             <div className="mb-2 block">
               <Label htmlFor="postcode" value="Postleitzahl" />
@@ -156,24 +177,6 @@ const Checkout = () => {
               color={errors.postcode ? "failure" : ""}
               helperText={
                 errors.postcode && <span>Postleitzahl erforderlich</span>
-              }
-              className="w-full"
-            />
-          </div>
-          <div className="w-full">
-            <div className="mb-2 block">
-              <Label htmlFor="city" value="Stadt" />
-            </div>
-            <TextInput
-              id="city"
-              {...register("city", { required: true })}
-              placeholder="Stadtname eingeben"
-              shadow
-              type="text"
-              name="city"
-              color={errors.city ? "failure" : ""}
-              helperText={
-                errors.city && <span>Name der Stadt erforderlich</span>
               }
               className="w-full"
             />
@@ -230,26 +233,6 @@ const Checkout = () => {
           </div>
           <div className="w-full">
             <div className="mb-2 block">
-              <Label htmlFor="email" value="E-mail" />
-            </div>
-            <TextInput
-              id="email"
-              {...register("email", { required: true })}
-              placeholder="Max@mustermann.com..."
-              shadow
-              type="email"
-              name="email"
-              color={errors.email ? "failure" : ""}
-              helperText={
-                errors.email && <span>E-mail Adresse erforderlich</span>
-              }
-              className="w-full"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
-          <div className="w-full">
-            <div className="mb-2 block">
               <Label htmlFor="phone" value="Telefonnummer" />
             </div>
             <TextInput
@@ -261,9 +244,26 @@ const Checkout = () => {
               name="phone"
               color={errors.phone ? "failure" : ""}
               helperText={
-                errors.phone && <span>Postleitzahl erforderlich</span>
+                errors.phone && <span>Telefonnummer erforderlich</span>
               }
               className="w-full"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
+          <div className="w-full">
+            <div className="mb-2 block">
+              <Label htmlFor="note" value="Bestellzettel" />
+            </div>
+            <Textarea
+              id="note"
+              {...register("note")}
+              placeholder="Bestellzettel..."
+              shadow
+              type="text"
+              name="note"
+              rows={5}
+              className="w-full resize-none"
             />
           </div>
         </div>
@@ -351,8 +351,9 @@ const Checkout = () => {
         </div>
         <div className="my-10">
           <button
-            className="w-full md:w-max bg-primary text-white rounded-xl text-base md:text-lg px-10 py-4 font-semibold"
+            className="w-full md:w-max bg-primary text-white rounded-xl text-base md:text-lg px-10 py-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             type="submit"
+            disabled={cart.length === 0}
           >
             Bestellen und bezahlen mit {selectedPayment.name} ({getCartTotal(cart)} €)
           </button>
