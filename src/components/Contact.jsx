@@ -5,6 +5,8 @@ import { Label, TextInput, Textarea } from "flowbite-react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { IoMdSend } from "react-icons/io";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import axios from "axios";
 // import emailjs from "emailjs-com";
 
 const GetInTouch = () => {
@@ -59,42 +61,26 @@ const GetInTouch = () => {
   const onSubmit = (data) => {
     setLoading(true);
 
-    // // Format the form data as you like for the email body
-    // const emailData = {
-    //   company: data.company,
-    //   name: data.name,
-    //   phone: data.phone,
-    //   email: data.email,
-    //   projectDetails: data.projectDetails,
-    //   //   agree: data.agree ? 'Agreed' : 'Not Agreed', // Assuming agree is a checkbox
-    // };
-
-    // Send the email using EmailJS
-    // emailjs
-    //   .send(
-    //     "service_6f4gggs",
-    //     "template_iouoqvg",
-    //     emailData,
-    //     "Wz0e517C1GC6puU6-"
-    //   )
-    //   .then((response) => {
-    //     props.setOpenModal("pop-up-suc");
-    //     setLoading(false);
-
-    //     reset(); // Reset the form after successful submission
-    //   })
-    //   .catch((error) => {
-    //     props.setOpenModal("pop-up-err");
-    //     setLoading(false);
-    //   });
-
-    console.log(data);
-    console.log(errors);
-    setLoading(false);
+    axios
+      .post("https://tastykitchen-backend.vercel.app/contacts", data) // Change the URL to your API endpoint
+      .then((response) => {
+        toast.dismiss();
+        toast.success("Nachricht erfolgreich gesendet!");
+        reset();
+        setLoading(false);
+      })
+      .catch((error) => {
+        toast.dismiss();
+        toast.error("Fehler beim Senden der Kontaktanfrage");
+        setLoading(false);
+      });
   };
 
   return (
-    <section id="getInTouch" className="w-11/12 mx-auto pt-[10vh] md:py-20 mb-32">
+    <section
+      id="getInTouch"
+      className="w-11/12 mx-auto pt-[10vh] md:py-20 mb-32"
+    >
       <div className="container mx-auto px-4">
         <div className="flex flex-col-reverse md:flex-row md:space-x-20 items-center">
           <motion.div
@@ -106,10 +92,7 @@ const GetInTouch = () => {
           >
             <h2 className="text-center md:text-left text-3xl md:text-3xl font-bold mb-8">
               Kontaktiere uns
-              <span className="text-primary ml-2">
-                jetzt!
-              </span>{" "}
-              !
+              <span className="text-primary ml-2">jetzt!</span> !
             </h2>
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -128,7 +111,9 @@ const GetInTouch = () => {
                     type="email"
                     name="email"
                     color={errors.email ? "failure" : ""}
-                    helperText={errors.email && <span>E-mail ist erforderlich</span>}
+                    helperText={
+                      errors.email && <span>E-mail ist erforderlich</span>
+                    }
                     className="w-full"
                   />
                 </div>
@@ -143,7 +128,11 @@ const GetInTouch = () => {
                     shadow
                     type="text"
                     color={errors.name ? "failure" : ""}
-                    helperText={errors.name && <span>Vollständiger Name ist erforderlich</span>}
+                    helperText={
+                      errors.name && (
+                        <span>Vollständiger Name ist erforderlich</span>
+                      )
+                    }
                     name="name"
                     className="w-full"
                   />

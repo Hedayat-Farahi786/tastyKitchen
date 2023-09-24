@@ -12,7 +12,7 @@ const cartSlice = createSlice({
     addToCart: (state, action) => {
       const { product, extras, price, quantity } = action.payload;
       const existingItemIndex = state.cart.findIndex(
-        (item) => item.product.id === product.id && item.price === price && areExtrasEqual(item.extras, extras)
+        (item) => item.product._id === product._id && item.price === price && areExtrasEqual(item.extras, extras)
       );
 
       if (existingItemIndex !== -1) {
@@ -33,7 +33,7 @@ const cartSlice = createSlice({
       const { productId, extras } = action.payload;
       const existingItemIndex = state.cart.findIndex(
         (item) =>
-          item.product.id === productId && areExtrasEqual(item.extras, extras)
+          item.product._id === productId && areExtrasEqual(item.extras, extras)
       );
 
       if (existingItemIndex !== -1) {

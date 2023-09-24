@@ -21,10 +21,6 @@ const Final = () => {
 
   const dispatch = useDispatch();
 
-  useEffect(()=>{
-  console.log(order);
-  },[])
-
 
   useEffect(() => {
     let timer;
@@ -86,8 +82,7 @@ const Final = () => {
         toast.error("Fehler beim Teilen.");
       }
     } else {
-      // Fallback for browsers that do not support the Web Share API
-      console.log("Web Share API is not supported");
+      toast.error("API Fehler beim Teilen");
     }
   };
 

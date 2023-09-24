@@ -365,7 +365,7 @@ const Navbar = () => {
                           onClick={() =>
                             dispatch(
                               removeFromCart({
-                                productId: item.product.id,
+                                productId: item.product._id,
                                 extras: item.extras,
                               })
                             )

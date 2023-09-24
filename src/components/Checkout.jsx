@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, resetCart } from "../store/cart";
 import { useHistory } from "react-router-dom";
 import { addOrder } from "../store/order";
+import axios from "axios";
+import toast from "react-hot-toast";
 const payments = [
   {
     name: "Barzahlung",
@@ -52,14 +54,12 @@ const Checkout = () => {
 
   const order = useSelector((state) => state.order.order);
 
-
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
   } = useForm();
-
 
   // const getLocation = () => {
   //   if ("geolocation" in navigator) {
@@ -77,23 +77,57 @@ const Checkout = () => {
   //   }
   // };
 
+  function modifyProductsArray(products) {
+    return products.map((productItem) => ({
+      productId: productItem.product._id,
+      extras: productItem.extras,
+      quantity: productItem.quantity,
+      price: productItem.price,
+    }));
+  }
 
   const onSubmit = (data) => {
-
     // if (userLocation) {
     //   // If user's location is available, add it to the form data
     //   data.latitude = userLocation.latitude;
     //   data.longitude = userLocation.longitude;
     // }
 
-    localStorage.setItem('formData', JSON.stringify(data));
+    localStorage.setItem("formData", JSON.stringify(data));
     data.products = cart;
     data.totalPrice = getCartTotal(cart);
     data.payment = selectedPayment.name;
     data.time = new Date().toLocaleString();
     dispatch(addOrder(data));
-    dispatch(resetCart());
-    history.push('/done');
+
+    const res = {
+      customer: {
+        name: data.name,
+        phone: data.phone,
+      },
+      delivery: {
+        street: data.street,
+        postcode: data.postcode,
+        floor: data.floor,
+        company: data.company,
+        note: data.note,
+      },
+      products: modifyProductsArray(data.products),
+      totalPrice: data.totalPrice,
+      payment: data.payment,
+      time: new Date(),
+    };
+
+    axios
+      .post(`https://tastykitchen-backend.vercel.app/orders`, res) // Change the URL to your API endpoint
+      .then((response) => {
+        dispatch(resetCart());
+        history.push("/done");
+      })
+      .catch((error) => {
+        toast.dismiss();
+        toast.error("Fehler bei der Bestellung!");
+      });
   };
 
   const handlePaymentSelection = (option) => {
@@ -101,14 +135,14 @@ const Checkout = () => {
     setIsModalOpen(false);
   };
 
-  useEffect(()=>{
-    if(cart.length === 0){
+  useEffect(() => {
+    if (cart.length === 0) {
       history.goBack();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    const savedData = localStorage.getItem('formData');
+    const savedData = localStorage.getItem("formData");
     if (savedData) {
       reset(JSON.parse(savedData));
     }
@@ -143,7 +177,9 @@ const Checkout = () => {
             Get My Location
           </button>
         </div> */}
-        <p className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">Lieferadresse</p>
+        <p className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">
+          Lieferadresse
+        </p>
         <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
           <div className="w-full">
             <div className="mb-2 block">
@@ -158,7 +194,9 @@ const Checkout = () => {
               name="street"
               color={errors.street ? "failure" : ""}
               helperText={
-                errors.street && <span>Straße und Hausnummer ist erforderlich</span>
+                errors.street && (
+                  <span>Straße und Hausnummer ist erforderlich</span>
+                )
               }
               className="w-full"
             />
@@ -286,7 +324,9 @@ const Checkout = () => {
               </svg>
               <div>
                 <p className="font-semibold text-md">Lieferzeit</p>
-                <p className="text-xs md:text-sm">Geschätzte Ankunftszeit: 20-45 Min.</p>
+                <p className="text-xs md:text-sm">
+                  Geschätzte Ankunftszeit: 20-45 Min.
+                </p>
               </div>
             </div>
 
@@ -355,7 +395,8 @@ const Checkout = () => {
             type="submit"
             disabled={cart.length === 0}
           >
-            Bestellen und bezahlen mit {selectedPayment.name} ({getCartTotal(cart)} €)
+            Bestellen und bezahlen mit {selectedPayment.name} (
+            {getCartTotal(cart)} €)
           </button>
         </div>
 
@@ -401,7 +442,9 @@ const Checkout = () => {
                           alt={option.name}
                         />
 
-                        <p className="font-semibold text-md md:text-lg">{option.name}</p>
+                        <p className="font-semibold text-md md:text-lg">
+                          {option.name}
+                        </p>
                       </div>
 
                       {option.name === selectedPayment.name && (
@@ -429,82 +472,85 @@ const Checkout = () => {
         </AnimatePresence>
       </form>
       <div className="checkout__right hidden md:block w-4/12 py-5 md:py-10">
-      <div className="w-full flex items-center justify-between">
-            <p className="font-semibold text-xl">Warenkorb</p>
+        <div className="w-full flex items-center justify-between">
+          <p className="font-semibold text-xl">Warenkorb</p>
+        </div>
 
-
+        <div>
+          <div className="pt-10 flex flex-col space-y-2">
+            {cart.map((item, i) => (
+              <div key={i}>
+                <div className="flex justify-between space-x-2 w-full py-2">
+                  <div className="flex space-x-2">
+                    <img
+                      className="w-12 h-12 object-cover rounded-md"
+                      src={item.product.image}
+                      alt={item.product.name}
+                    />
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-xs md:text-sm font-semibold">
+                        {item.product.name}{" "}
+                        <span className="font-normal text-gray-500 ml-1">
+                          x{item.quantity}
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {item.price.toFixed(2)}€
+                      </p>
+                      {item.extras.length > 0 && (
+                        <Tooltip
+                          content={item.extras
+                            .map((extra) => extra.name)
+                            .join(", ")}
+                          style="light"
+                        >
+                          <p className="text-[8px] cursor-pointer md:text-[10px] text-primary underline">
+                            Mit extras
+                          </p>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end justify-between">
+                    <p className="font-semibold text-sm">
+                      {(item.price * item.quantity).toFixed(2)}€
+                    </p>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-4 h-4 text-red-600 cursor-pointer"
+                      onClick={() =>
+                        dispatch(
+                          removeFromCart({
+                            productId: item.product._id,
+                            extras: item.extras,
+                          })
+                        )
+                      }
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="h-[1px] w-full bg-gray-300 mt-3"></div>
+              </div>
+            ))}
           </div>
 
-            <div>
-              <div className="pt-10 flex flex-col space-y-2">
-                {cart.map((item, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between space-x-2 w-full py-2">
-                      <div className="flex space-x-2">
-                        <img
-                          className="w-12 h-12 object-cover rounded-md"
-                          src={item.product.image}
-                          alt={item.product.name}
-                        />
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-xs md:text-sm font-semibold">
-                            {item.product.name}{" "}
-                            <span className="font-normal text-gray-500 ml-1">
-                              x{item.quantity}
-                            </span>
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            {item.price.toFixed(2)}€
-                          </p>
-                          {item.extras.length > 0 && (
-                            <Tooltip
-                              content={item.extras
-                                .map((extra) => extra.name)
-                                .join(", ")}
-                              style="light"
-                            >
-                              <p className="text-[8px] cursor-pointer md:text-[10px] text-primary underline">
-                                Mit extras
-                              </p>
-                            </Tooltip>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end justify-between">
-                        <p className="font-semibold text-sm">
-                          {(item.price * item.quantity).toFixed(2)}€
-                        </p>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="w-4 h-4 text-red-600 cursor-pointer"
-                          onClick={() =>
-                            dispatch(removeFromCart({productId: item.product.id, extras: item.extras}))
-                          }
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="h-[1px] w-full bg-gray-300 mt-3"></div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between mt-4">
-                <p className="uppercase font-medium">Gesamt</p>
-                <p className="text-xl text-primary font-semibold">
-                  {getCartTotal(cart)}€
-                </p>
-              </div>
-            </div>
+          <div className="flex items-center justify-between mt-4">
+            <p className="uppercase font-medium">Gesamt</p>
+            <p className="text-xl text-primary font-semibold">
+              {getCartTotal(cart)}€
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

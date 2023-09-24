@@ -40,17 +40,7 @@ const productSlice = createSlice({
       );
     },
     setExtras: (state, action) => {
-      if (action.payload.menuId === 1) {
-        state.extras = saladDressings;
-      } else if (action.payload.menuId === 2) {
-        state.extras = pizzaToppings;
-      } else if (action.payload.menuId === 3) {
-        state.extras = burgerToppings;
-      } else {
-        state.extras = [];
-      }
-      // state.extras =
-      //   action.payload.menuId === 1 ? pizzaToppings : burgerToppings;
+      state.extras = action.payload;
     },
     setQuantity: (state, action) => {
       state.quantity = action.payload;
