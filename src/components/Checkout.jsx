@@ -120,11 +120,11 @@ const Checkout = () => {
 
     axios
       .post(`https://tastykitchen-backend.vercel.app/orders`, res) // Change the URL to your API endpoint
-      .then((response) => {
+      .then(() => {
         dispatch(resetCart());
         history.push("/done");
       })
-      .catch((error) => {
+      .catch(() => {
         toast.dismiss();
         toast.error("Fehler bei der Bestellung!");
       });

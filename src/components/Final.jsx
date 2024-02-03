@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import MapWithDistance from "./MapWithDistance";
 import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleCart } from "../store/cart";
+import confetti from 'canvas-confetti'; // Import canvas-confetti
 
 const Final = () => {
   // Mock restaurant location
@@ -21,32 +22,65 @@ const Final = () => {
 
   const dispatch = useDispatch();
 
+  const confettiFired = useRef(false); // useRef to track confetti firing
 
-  useEffect(() => {
-    let timer;
 
-    if (showCheckmark) {
-      // Display the checkmark for the first 3 seconds
-      setTimeout(() => {
-        setShowCheckmark(false);
-        // Start the timer countdown after 3 seconds
+    // Log states to diagnose re-renders
+    console.log('Component rendered with showCheckmark:', showCheckmark, 'and done:', done);
+
+    // Confetti logic
+    useEffect(() => {
+      if (!confettiFired.current) {
+        confetti({
+          particleCount: 150,
+          spread: 120,
+          origin: { y: 0.8 }
+        });
+        confettiFired.current = true;
+      }
+    }, []); // Empty dependency array ensures this runs only once
+  
+    // Timer and checkmark logic
+    useEffect(() => {
+      console.log("useEffect for timer/checkmark entered");
+  
+      let timer;
+      if (!showCheckmark) {
+        // Timer logic only starts if showCheckmark is false
         timer = setInterval(() => {
-          // Update the time left
           setTimeLeft((prevTimeLeft) => {
-            if (prevTimeLeft === 0) {
+            const updatedTimeLeft = prevTimeLeft - 1;
+            if (updatedTimeLeft <= 0) {
               clearInterval(timer);
               setDone(true);
               return 0;
             }
-            return prevTimeLeft - 1;
+            return updatedTimeLeft;
           });
         }, 1000);
-      }, 1500);
-    }
+      }
+  
+      // Cleanup for timer interval
+      return () => {
+        if (timer) {
+          clearInterval(timer);
+        }
+      };
+    }, [showCheckmark]); // Depend on showCheckmark
+  
+    useEffect(() => {
+      // This effect handles the initial delay before hiding the checkmark
+      if (showCheckmark) {
+        const timeout = setTimeout(() => {
+          setShowCheckmark(false);
+          console.log("Checkmark hidden, starting timer");
+        }, 1500);
+  
+        return () => clearTimeout(timeout);
+      }
+    }, [showCheckmark]);
+  
 
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(timer);
-  }, [showCheckmark]); // Add showCheckmark as a dependency
 
   // Calculate the percentage of time left
   const percentage = ((initialTime - timeLeft) / initialTime) * 100;
