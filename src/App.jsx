@@ -111,7 +111,7 @@ const App = () => {
                 <Route path="/products" component={Products} />
                 <Route path="/contact" component={Contact} />
                 <Route path="/checkout" component={Checkout} />
-                <Route path="/done" component={Final} />
+                <Route path="/done/:orderNumber" component={Final} />
               </Switch>
             </Flowbite>
           </Router>

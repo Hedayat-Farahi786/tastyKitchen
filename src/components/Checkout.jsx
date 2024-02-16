@@ -85,21 +85,19 @@ const Checkout = () => {
       price: productItem.price,
     }));
   }
-
   const onSubmit = (data) => {
     // if (userLocation) {
     //   // If user's location is available, add it to the form data
     //   data.latitude = userLocation.latitude;
     //   data.longitude = userLocation.longitude;
     // }
-
+  
     localStorage.setItem("formData", JSON.stringify(data));
     data.products = cart;
     data.totalPrice = getCartTotal(cart);
     data.payment = selectedPayment.name;
     data.time = new Date().toLocaleString();
-    dispatch(addOrder(data));
-
+  
     const res = {
       customer: {
         name: data.name,
@@ -117,18 +115,21 @@ const Checkout = () => {
       payment: data.payment,
       time: new Date(),
     };
-
+  
     axios
       .post(`https://tastykitchen-backend.vercel.app/orders`, res) // Change the URL to your API endpoint
-      .then(() => {
+      .then((response) => {
+        const order = response.data; // Get the order details from the response
+        dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
         dispatch(resetCart());
-        history.push("/done");
+        history.push("/done/" + order.orderNumber);
       })
       .catch(() => {
         toast.dismiss();
         toast.error("Fehler bei der Bestellung!");
       });
   };
+  
 
   const handlePaymentSelection = (option) => {
     setSelectedPayment(option);

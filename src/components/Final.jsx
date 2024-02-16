@@ -4,8 +4,12 @@ import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleCart } from "../store/cart";
 import confetti from 'canvas-confetti'; // Import canvas-confetti
+import axios from "axios";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 
 const Final = () => {
+  const { orderNumber } = useParams(); // Extract the order number from the route parameters
+
   // Mock restaurant location
   const restaurantLocation = { lat: 48.2178, lng: 11.52544 }; // Replace LATITUDE and LONGITUDE with the actual coordinates of your restaurant.
 
@@ -16,71 +20,82 @@ const Final = () => {
   const [timeLeft, setTimeLeft] = useState(initialTime); // Initial time left in seconds
   const [showCheckmark, setShowCheckmark] = useState(true); // Initial state to show the checkmark
   const [done, setDone] = useState(false); // Indicates if the timer is done
-
-  const order = useSelector((state) => state.order.order);
-
+  const [order, setOrder] = useState(null); // State to store the order details
 
   const dispatch = useDispatch();
 
   const confettiFired = useRef(false); // useRef to track confetti firing
 
+  // Log states to diagnose re-renders
+  console.log('Component rendered with showCheckmark:', showCheckmark, 'and done:', done);
 
-    // Log states to diagnose re-renders
-    console.log('Component rendered with showCheckmark:', showCheckmark, 'and done:', done);
+  // Confetti logic
+  useEffect(() => {
+    if (!confettiFired.current) {
+      confetti({
+        particleCount: 150,
+        spread: 120,
+        origin: { y: 0.8 }
+      });
+      confettiFired.current = true;
+    }
+  }, []); // Empty dependency array ensures this runs only once
 
-    // Confetti logic
-    useEffect(() => {
-      if (!confettiFired.current) {
-        confetti({
-          particleCount: 150,
-          spread: 120,
-          origin: { y: 0.8 }
+  // Timer and checkmark logic
+  useEffect(() => {
+    console.log("useEffect for timer/checkmark entered");
+
+    let timer;
+    if (!showCheckmark) {
+      // Timer logic only starts if showCheckmark is false
+      timer = setInterval(() => {
+        setTimeLeft((prevTimeLeft) => {
+          const updatedTimeLeft = prevTimeLeft - 1;
+          if (updatedTimeLeft <= 0) {
+            clearInterval(timer);
+            setDone(true);
+            return 0;
+          }
+          return updatedTimeLeft;
         });
-        confettiFired.current = true;
-      }
-    }, []); // Empty dependency array ensures this runs only once
-  
-    // Timer and checkmark logic
-    useEffect(() => {
-      console.log("useEffect for timer/checkmark entered");
-  
-      let timer;
-      if (!showCheckmark) {
-        // Timer logic only starts if showCheckmark is false
-        timer = setInterval(() => {
-          setTimeLeft((prevTimeLeft) => {
-            const updatedTimeLeft = prevTimeLeft - 1;
-            if (updatedTimeLeft <= 0) {
-              clearInterval(timer);
-              setDone(true);
-              return 0;
-            }
-            return updatedTimeLeft;
-          });
-        }, 1000);
-      }
-  
-      // Cleanup for timer interval
-      return () => {
-        if (timer) {
-          clearInterval(timer);
-        }
-      };
-    }, [showCheckmark]); // Depend on showCheckmark
-  
-    useEffect(() => {
-      // This effect handles the initial delay before hiding the checkmark
-      if (showCheckmark) {
-        const timeout = setTimeout(() => {
-          setShowCheckmark(false);
-          console.log("Checkmark hidden, starting timer");
-        }, 1500);
-  
-        return () => clearTimeout(timeout);
-      }
-    }, [showCheckmark]);
-  
+      }, 1000);
+    }
 
+    // Cleanup for timer interval
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [showCheckmark]); // Depend on showCheckmark
+
+  useEffect(() => {
+    // This effect handles the initial delay before hiding the checkmark
+    if (showCheckmark) {
+      const timeout = setTimeout(() => {
+        setShowCheckmark(false);
+        console.log("Checkmark hidden, starting timer");
+      }, 1500);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [showCheckmark]);
+
+  // Fetch order details based on the order number
+  useEffect(() => {
+    axios.get(`https://tastykitchen-backend.vercel.app/orders/${orderNumber}`)
+      .then(response => {
+        setOrder(response.data);
+        // Proceed with the remaining logic once the order details are fetched successfully
+        // For example, dispatch an action or call a function
+        // dispatch(addOrder(response.data));
+        // handleRemainingLogic();
+      })
+      .catch(error => {
+        console.error('Error fetching order:', error);
+        toast.error("Fehler beim Laden der Bestellung.");
+      });
+  }, [orderNumber]);
 
   // Calculate the percentage of time left
   const percentage = ((initialTime - timeLeft) / initialTime) * 100;
@@ -192,7 +207,7 @@ const Final = () => {
 
         <div className="flex flex-col items-center justify-center space-x-2">
           <span className="text-[#e53935] text-base">Bestellnummer</span>
-          <span className="font-semibold text-lg">234234</span>
+          <span className="font-semibold text-lg">#{order?.orderNumber}</span>
         </div>
 
         <button
