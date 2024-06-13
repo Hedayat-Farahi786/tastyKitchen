@@ -13,6 +13,10 @@ import { useHistory } from "react-router-dom";
 import { addOrder } from "../store/order";
 import axios from "axios";
 import toast from "react-hot-toast";
+import io from "socket.io-client";
+
+const socket = io('https://tastykitchen-backend.vercel.app'); // Replace with your backend URL
+
 const payments = [
   {
     name: "Barzahlung",
@@ -122,6 +126,7 @@ const Checkout = () => {
         const order = response.data; // Get the order details from the response
         dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
         dispatch(resetCart());
+        socket.emit('new_order', response.data);
         history.push("/done/" + order.orderNumber);
       })
       .catch(() => {
