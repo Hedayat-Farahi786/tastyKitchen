@@ -130,7 +130,7 @@ const Checkout = () => {
       .post(`https://tastykitchen-backend.vercel.app/orders`, res)
       .then((response) => {
         const order = response.data; // Get the order details from the response
-        socket.emit("new_order", response.data);
+        // socket.emit("new_order", response.data);
         dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
         dispatch(resetCart());
         history.push("/done/" + order.orderNumber);
