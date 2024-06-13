@@ -15,7 +15,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 import io from "socket.io-client";
-const socket = io("https://tasty-kitchen-socket.vercel.app", {
+const socket = io("http://localhost:5000", {
   transports: ["websocket", "polling"], // Explicitly use WebSocket transport
   path: "/socket",
   reconnectionAttempts: 5,
@@ -130,7 +130,7 @@ const Checkout = () => {
       .post(`https://tastykitchen-backend.vercel.app/orders`, res)
       .then((response) => {
         const order = response.data; // Get the order details from the response
-        // socket.emit("new_order", response.data);
+        socket.emit("new_order", response.data);
         dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
         dispatch(resetCart());
         history.push("/done/" + order.orderNumber);
