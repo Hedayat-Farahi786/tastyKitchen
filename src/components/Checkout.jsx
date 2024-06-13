@@ -13,6 +13,14 @@ import { useHistory } from "react-router-dom";
 import { addOrder } from "../store/order";
 import axios from "axios";
 import toast from "react-hot-toast";
+
+import io from "socket.io-client";
+const socket = io("https://tasty-kitchen-socket.vercel.app", {
+  transports: ["websocket"], // Explicitly use WebSocket transport
+  reconnectionAttempts: 5,
+  timeout: 20000,
+});
+
 const payments = [
   {
     name: "Barzahlung",
@@ -49,7 +57,6 @@ const Checkout = () => {
   const [selectedPayment, setSelectedPayment] = useState(payments[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   // const [userLocation, setUserLocation] = useState(null); // Store user's location
-
   const history = useHistory();
 
   const order = useSelector((state) => state.order.order);
@@ -91,13 +98,13 @@ const Checkout = () => {
     //   data.latitude = userLocation.latitude;
     //   data.longitude = userLocation.longitude;
     // }
-  
+
     localStorage.setItem("formData", JSON.stringify(data));
     data.products = cart;
     data.totalPrice = getCartTotal(cart);
     data.payment = selectedPayment.name;
     data.time = new Date().toLocaleString();
-  
+
     const res = {
       customer: {
         name: data.name,
@@ -115,11 +122,12 @@ const Checkout = () => {
       payment: data.payment,
       time: new Date(),
     };
-  
+
     axios
-      .post(`https://tastykitchen-backend.vercel.app/orders`, res) // Change the URL to your API endpoint
+      .post(`https://tastykitchen-backend.vercel.app/orders`, res)
       .then((response) => {
         const order = response.data; // Get the order details from the response
+        socket.emit("new_order", response.data);
         dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
         dispatch(resetCart());
         history.push("/done/" + order.orderNumber);
@@ -129,7 +137,6 @@ const Checkout = () => {
         toast.error("Fehler bei der Bestellung!");
       });
   };
-  
 
   const handlePaymentSelection = (option) => {
     setSelectedPayment(option);
