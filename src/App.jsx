@@ -1,5 +1,5 @@
 import Navbar from "./components/Navbar";
-import 'leaflet/dist/leaflet.css';
+import "leaflet/dist/leaflet.css";
 // import 'react-leaflet-markercluster/dist/styles.min.css'; // If you're using marker clusters
 
 import { Flowbite } from "flowbite-react";
@@ -73,17 +73,20 @@ const App = () => {
     );
     dispatch(setIsModalOpen(false));
     toast.dismiss();
-      toast((t) => (
-        <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
-          <b>Produkt hinzugefügt!</b>
-          <button className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1" onClick={() => {
+    toast((t) => (
+      <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
+        <b>Produkt hinzugefügt!</b>
+        <button
+          className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
+          onClick={() => {
             dispatch(toggleCart());
             toast.dismiss();
-          }}>
+          }}
+        >
           Warenkorb
-          </button>
-        </span>
-      ));
+        </button>
+      </span>
+    ));
   };
 
   const handleLoadingComplete = (complete) => {
@@ -103,7 +106,7 @@ const App = () => {
       {isLoadingComplete ? (
         <div className="w-full overflow-x-hidden relative">
           <Router>
-            <Toaster  position="bottom-center" />
+            <Toaster position="bottom-center" />
             <Flowbite theme={{ theme: customTheme }}>
               <Navbar />
               <Switch>
@@ -159,7 +162,7 @@ const App = () => {
                     {selectedProduct.options.length > 0 && (
                       <div className="flex flex-col gap-3">
                         <p className="text-sm font-semibold mb-2">
-                          Select a size
+                          {selectedProduct.optionsTitle}
                         </p>
                         {selectedProduct.options.map((option, i) => (
                           <label
@@ -182,35 +185,37 @@ const App = () => {
                         ))}
                       </div>
                     )}
-                    <div className="w-full h-[1px] bg-gray-300 my-5"></div>
-                    {selectedProduct.options.length > 0 && (
-                      <div className="flex flex-col gap-3">
-                        <p className="text-sm font-semibold mb-2">
-                          {selectedProduct.optionsTitle}
-                        </p>
-                        {extras.map((topping, i) => (
-                          <label
-                            className="pl-2 flex items-center space-x-3 cursor-pointer"
-                            key={i}
-                          >
-                            <input
-                              type="checkbox"
-                              className="text-primary focus:ring-[#E53935]"
-                              checked={selectedToppings.some(
-                                (item) => item.name === topping.name
-                              )}
-                              onChange={() => handleToppingsChange(topping)}
-                            />
-                            <div className="flex items-center space-x-2">
-                              <p className="text-sm">{topping.name}</p>
-                              <span className="text-xs text-gray-500">
-                                {topping.price.toFixed(2)}€
-                              </span>
-                            </div>
-                          </label>
-                        ))}
+                    {extras.length > 0 && (
+                      <>
+                        <div className="w-full h-[1px] bg-gray-300 my-5"></div>
+                        {selectedProduct.options.length > 0 && (
+                          <div className="flex flex-col gap-3">
+                            <p className="text-sm font-semibold mb-2">
+                              Extras:
+                            </p>
+                            {extras.map((topping, i) => (
+                              <label
+                                className="pl-2 flex items-center space-x-3 cursor-pointer"
+                                key={i}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="text-primary focus:ring-[#E53935]"
+                                  checked={selectedToppings.some(
+                                    (item) => item.name === topping.name
+                                  )}
+                                  onChange={() => handleToppingsChange(topping)}
+                                />
+                                <div className="flex items-center space-x-2">
+                                  <p className="text-sm">{topping.name}</p>
+                                  <span className="text-xs text-gray-500">
+                                    {topping.price.toFixed(2)}€
+                                  </span>
+                                </div>
+                              </label>
+                            ))}
 
-                        {/* {extras.map((topping, i) => (
+                            {/* {extras.map((topping, i) => (
                       <div className="pl-2 flex items-center space-x-3" key={i}>
                         <input
                           type="checkbox"
@@ -226,7 +231,9 @@ const App = () => {
                         </span>
                       </div>
                     ))} */}
-                      </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                   {selectedProduct.options.length > 0 && (

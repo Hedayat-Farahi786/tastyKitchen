@@ -51,7 +51,7 @@ const ProductCard = ({ product, onChooseOptions, productsView }) => {
           } md:py-2 rounded-br-lg rounded-bl-lg border border-[#E53935]`}
         >
           <p className={`${isProductsView ? "text-xs" : "text-sm"} md:text-sm font-semibold`}>
-          {product.options[0].price.toFixed(2)}€
+          {product?.options[0]?.price.toFixed(2)}€
           </p>
           {/* <svg
             xmlns="http://www.w3.org/2000/svg"

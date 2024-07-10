@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import NoProducts from "../assets/productNoResult.png";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { addToCart, toggleCart } from "../store/cart";
 
 const Products = ({ dark }) => {
   const [items, setItems] = useState([]);
@@ -68,6 +69,30 @@ const Products = ({ dark }) => {
     if (product.options.length === 0) {
       toast.dismiss();
       toast.error("Keine option");
+    } else if(product.options.length === 1 && extras.length === 0) {
+      dispatch(
+        addToCart({
+          product,
+          extras,
+          price: product.options[0].price,
+          quantity: 1,
+        })
+      );
+      toast.dismiss();
+      toast((t) => (
+        <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
+          <b>Produkt hinzugefügt!</b>
+          <button
+            className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
+            onClick={() => {
+              dispatch(toggleCart());
+              toast.dismiss();
+            }}
+          >
+            Warenkorb
+          </button>
+        </span>
+      ));
     } else {
       dispatch(setSelectedProduct(product));
       dispatch(setSelectedOption(product.options[0]));
