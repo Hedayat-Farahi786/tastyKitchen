@@ -26,7 +26,7 @@ const ProductCard = ({ product, onChooseOptions, productsView }) => {
             isProductsView ? "text-xs" : "text-lg"
           } md:text-lg font-semibold mb-2`}
         >
-          {product.name}
+          {product.name} {product.visible}
         </h2>
         </div>
         <div className="truncate">
