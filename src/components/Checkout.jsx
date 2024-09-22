@@ -2,27 +2,36 @@ import { Label, TextInput, Textarea, Tooltip } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AnimatePresence, motion } from "framer-motion";
-import cashIcon from "../assets/cash.png";
-import klarnaIcon from "../assets/klarna.png";
-import paypalIcon from "../assets/paypal.png";
-import creditIcon from "../assets/credit.png";
-import giroIcon from "../assets/giro.png";
 import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, resetCart } from "../store/cart";
 import { useHistory } from "react-router-dom";
 import { addOrder } from "../store/order";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import StripePaymentForm from './StripePaymentForm';
 
 import io from "socket.io-client";
 const socket = io("http://localhost:5000", {
-  transports: ["websocket", "polling"], // Explicitly use WebSocket transport
+  transports: ["websocket", "polling"],
   path: "/socket",
   reconnectionAttempts: 5,
   timeout: 20000,
   reconnection: true,
   withCredentials: true
 });
+
+// Import your payment icons here
+import cashIcon from "../assets/cash.png";
+import klarnaIcon from "../assets/klarna.png";
+import paypalIcon from "../assets/paypal.png";
+import creditIcon from "../assets/credit.png";
+import giroIcon from "../assets/giro.png";
+// import stripeIcon from "../assets/stripe.png"; // You'll need to add this icon
+
+// Load your Stripe publishable key
+const stripePromise = loadStripe('your_stripe_publishable_key');
 
 const payments = [
   {
@@ -31,35 +40,41 @@ const payments = [
     title: "Bezahle mit",
     info: "Barzahlung - Passend",
   },
+  // {
+  //   name: "Sofortüberweisung",
+  //   icon: klarnaIcon,
+  //   title: "Zahlungsvorgang mit",
+  //   info: "Sofortüberweisung",
+  // },
+  // {
+  //   name: "PayPal",
+  //   icon: paypalIcon,
+  //   title: "Zahlungsvorgang mit",
+  //   info: "Paypal",
+  // },
   {
-    name: "Sofortüberweisung",
-    icon: klarnaIcon,
-    title: "Zahlungsvorgang mit",
-    info: "Sofortüberweisung",
-  },
-  {
-    name: "PayPal",
-    icon: paypalIcon,
-    title: "Zahlungsvorgang mit",
-    info: "Paypal",
-  },
-  {
-    name: "Kreditkarte",
+    name: "Stripe",
     icon: creditIcon,
     title: "Zahlungsvorgang mit",
-    info: "Kreditkarte",
+    info: "Stripe",
   },
-  {
-    name: "GiroPay",
-    icon: giroIcon,
-    title: "Zahlungsvorgang mit",
-    info: "GiroPay",
-  },
+  // {
+  //   name: "GiroPay",
+  //   icon: giroIcon,
+  //   title: "Zahlungsvorgang mit",
+  //   info: "GiroPay",
+  // },
+  // {
+  //   name: "Stripe",
+  //   icon: creditIcon,
+  //   title: "Zahlungsvorgang mit",
+  //   info: "Stripe",
+  // },
 ];
+
 const Checkout = () => {
   const [selectedPayment, setSelectedPayment] = useState(payments[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [userLocation, setUserLocation] = useState(null); // Store user's location
   const history = useHistory();
 
   const order = useSelector((state) => state.order.order);
@@ -71,21 +86,16 @@ const Checkout = () => {
     reset,
   } = useForm();
 
-  // const getLocation = () => {
-  //   if ("geolocation" in navigator) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const { latitude, longitude } = position.coords;
-  //         setUserLocation({ latitude, longitude });
-  //       },
-  //       (error) => {
-  //         console.error("Error getting user's location:", error);
-  //       }
-  //     );
-  //   } else {
-  //     console.error("Geolocation is not available in this browser.");
-  //   }
-  // };
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.cart);
+
+  const getCartTotal = (cart) => {
+    let total = 0;
+    cart.forEach((item) => {
+      total += item.price * item.quantity;
+    });
+    return total.toFixed(2);
+  };
 
   function modifyProductsArray(products) {
     return products.map((productItem) => ({
@@ -95,13 +105,14 @@ const Checkout = () => {
       price: productItem.price,
     }));
   }
-  const onSubmit = (data) => {
-    // if (userLocation) {
-    //   // If user's location is available, add it to the form data
-    //   data.latitude = userLocation.latitude;
-    //   data.longitude = userLocation.longitude;
-    // }
 
+  const handleStripePayment = async (result) => {
+    console.log('Payment successful:', result);
+    dispatch(resetCart());
+    history.push("/done/" + result.paymentIntent.id);
+  };
+
+  const onSubmit = (data) => {
     localStorage.setItem("formData", JSON.stringify(data));
     data.products = cart;
     data.totalPrice = getCartTotal(cart);
@@ -126,12 +137,17 @@ const Checkout = () => {
       time: new Date(),
     };
 
+    if (selectedPayment.name === "Stripe") {
+      // Stripe payment will be handled in the StripePaymentForm component
+      return;
+    }
+
     axios
       .post(`https://tastykitchen-backend.vercel.app/orders`, res)
       .then((response) => {
-        const order = response.data; // Get the order details from the response
+        const order = response.data;
         socket.emit("new_order", response.data);
-        dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
+        dispatch(addOrder(order));
         dispatch(resetCart());
         history.push("/done/" + order.orderNumber);
       })
@@ -159,35 +175,12 @@ const Checkout = () => {
     }
   }, [reset]);
 
-  const dispatch = useDispatch();
-
-  const cart = useSelector((state) => state.cart.cart);
-
-  const getCartTotal = (cart) => {
-    let total = 0;
-
-    cart.forEach((item) => {
-      total += item.price * item.quantity;
-    });
-
-    return total.toFixed(2);
-  };
-
   return (
     <div className="pt-[10vh] w-full flex space-x-20 px-8 md:px-20 py-5">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="checkout__left w-full md:w-8/12 py-5 md:py-10"
       >
-        {/* <div className="flex items-center justify-center">
-          <button
-            type="button"
-            onClick={getLocation}
-            className="bg-primary text-white rounded-xl px-4 py-2 font-semibold"
-          >
-            Get My Location
-          </button>
-        </div> */}
         <p className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">
           Lieferadresse
         </p>
@@ -400,16 +393,28 @@ const Checkout = () => {
             </svg>
           </div>
         </div>
-        <div className="my-10">
-          <button
-            className="w-full md:w-max bg-primary text-white rounded-xl text-base md:text-lg px-10 py-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            type="submit"
-            disabled={cart.length === 0}
-          >
-            Bestellen und bezahlen mit {selectedPayment.name} (
-            {getCartTotal(cart)} €)
-          </button>
-        </div>
+        
+        {selectedPayment.name === "Stripe" ? (
+          <div className="mt-5">
+            <Elements stripe={stripePromise}>
+              <StripePaymentForm
+                amount={getCartTotal(cart)}
+                onSuccess={handleStripePayment}
+              />
+            </Elements>
+          </div>
+        ) : (
+          <div className="my-10">
+            <button
+              className="w-full md:w-max bg-primary text-white rounded-xl text-base md:text-lg px-10 py-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              type="submit"
+              disabled={cart.length === 0}
+            >
+              Bestellen und bezahlen mit {selectedPayment.name} (
+              {getCartTotal(cart)} €)
+            </button>
+          </div>
+        )}
 
         <AnimatePresence>
           {isModalOpen && (

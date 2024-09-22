@@ -14,6 +14,8 @@
     "@emotion/styled": "^11.11.0",
     "@react-leaflet/core": "^2.1.0",
     "@reduxjs/toolkit": "^1.9.5",
+    "@stripe/react-stripe-js": "^2.8.0",
+    "@stripe/stripe-js": "^4.5.0",
     "axios": "^1.5.0",
     "canvas-confetti": "^1.9.2",
     "dotenv": "^16.3.1",
@@ -35,7 +37,8 @@
     "react-select": "^5.7.4",
     "react-slick": "^0.29.0",
     "slick-carousel": "^1.8.1",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.8.0",
+    "tastykitchen": "file:"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

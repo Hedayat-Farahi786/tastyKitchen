@@ -16,8 +16,8 @@ const Final = () => {
   // User's location (you can obtain this using the Geolocation API as shown in the previous response)
   const userLocation = { lat: 48.22359, lng: 11.55586 }; // Replace USER_LATITUDE and USER_LONGITUDE with the actual coordinates of the user's location.
 
-  const [initialTime] = useState(120); // Initial time in seconds
-  const [timeLeft, setTimeLeft] = useState(initialTime); // Initial time left in seconds
+  const [initialTime] = useState(60); // Initial time in minutes
+  const [timeLeft, setTimeLeft] = useState((initialTime - 1) * 60); // Initial time left in seconds
   const [showCheckmark, setShowCheckmark] = useState(true); // Initial state to show the checkmark
   const [done, setDone] = useState(false); // Indicates if the timer is done
   const [order, setOrder] = useState(null); // State to store the order details
