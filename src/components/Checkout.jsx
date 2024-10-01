@@ -121,7 +121,7 @@ const Checkout = () => {
     };
 
     axios
-      .post(`http://tastykitchen-backend.vercel.app/orders`, res)
+      .post(`https://tastykitchen-backend.vercel.app/orders`, res)
       .then((response) => {
         const order = response.data; // Get the order details from the response
         placeOrder(order);
