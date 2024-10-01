@@ -3,9 +3,10 @@ import MapWithDistance from "./MapWithDistance";
 import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleCart } from "../store/cart";
-import confetti from 'canvas-confetti'; // Import canvas-confetti
+import confetti from "canvas-confetti"; // Import canvas-confetti
 import axios from "axios";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
+import delivery from "../assets/delivery.png"
 
 const Final = () => {
   const { orderNumber } = useParams(); // Extract the order number from the route parameters
@@ -16,8 +17,7 @@ const Final = () => {
   // User's location (you can obtain this using the Geolocation API as shown in the previous response)
   const userLocation = { lat: 48.22359, lng: 11.55586 }; // Replace USER_LATITUDE and USER_LONGITUDE with the actual coordinates of the user's location.
 
-  const [initialTime] = useState(120); // Initial time in seconds
-  const [timeLeft, setTimeLeft] = useState(initialTime); // Initial time left in seconds
+  const [timeLeft, setTimeLeft] = useState(3600); // Time left in seconds (60 minutes)
   const [showCheckmark, setShowCheckmark] = useState(true); // Initial state to show the checkmark
   const [done, setDone] = useState(false); // Indicates if the timer is done
   const [order, setOrder] = useState(null); // State to store the order details
@@ -26,16 +26,13 @@ const Final = () => {
 
   const confettiFired = useRef(false); // useRef to track confetti firing
 
-  // Log states to diagnose re-renders
-  console.log('Component rendered with showCheckmark:', showCheckmark, 'and done:', done);
-
   // Confetti logic
   useEffect(() => {
     if (!confettiFired.current) {
       confetti({
         particleCount: 150,
         spread: 120,
-        origin: { y: 0.8 }
+        origin: { y: 0.8 },
       });
       confettiFired.current = true;
     }
@@ -43,11 +40,8 @@ const Final = () => {
 
   // Timer and checkmark logic
   useEffect(() => {
-    console.log("useEffect for timer/checkmark entered");
-
     let timer;
-    if (!showCheckmark) {
-      // Timer logic only starts if showCheckmark is false
+    if (!showCheckmark && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft((prevTimeLeft) => {
           const updatedTimeLeft = prevTimeLeft - 1;
@@ -61,45 +55,50 @@ const Final = () => {
       }, 1000);
     }
 
-    // Cleanup for timer interval
     return () => {
       if (timer) {
         clearInterval(timer);
       }
     };
-  }, [showCheckmark]); // Depend on showCheckmark
+  }, [showCheckmark, timeLeft]);
 
   useEffect(() => {
-    // This effect handles the initial delay before hiding the checkmark
     if (showCheckmark) {
       const timeout = setTimeout(() => {
         setShowCheckmark(false);
-        console.log("Checkmark hidden, starting timer");
       }, 1500);
-
       return () => clearTimeout(timeout);
     }
   }, [showCheckmark]);
 
-  // Fetch order details based on the order number
+  // Fetch order details and calculate time difference
   useEffect(() => {
-    axios.get(`https://tastykitchen-backend.vercel.app/orders/${orderNumber}`)
-      .then(response => {
+    axios
+      .get(`https://tastykitchen-backend.vercel.app/orders/${orderNumber}`)
+      .then((response) => {
         setOrder(response.data);
-        // Proceed with the remaining logic once the order details are fetched successfully
-        // For example, dispatch an action or call a function
-        // dispatch(addOrder(response.data));
-        // handleRemainingLogic();
+        console.log(response.data);
+
+        const orderTime = new Date(response.data.time).getTime(); // Order time in milliseconds
+        const currentTime = new Date().getTime(); // Current time in milliseconds
+
+        // Calculate the difference in seconds and set time left
+        const timeDifference = Math.floor((currentTime - orderTime) / 1000);
+        const remainingTime = 3600 - timeDifference; // 60 minutes in seconds
+
+        if (remainingTime > 0) {
+          setTimeLeft(remainingTime);
+        } else {
+          setDone(true); // If more than 60 minutes have passed
+        }
       })
-      .catch(error => {
-        console.error('Error fetching order:', error);
+      .catch((error) => {
+        console.error("Error fetching order:", error);
         toast.error("Fehler beim Laden der Bestellung.");
       });
   }, [orderNumber]);
 
-  // Calculate the percentage of time left
-  const percentage = ((initialTime - timeLeft) / initialTime) * 100;
-  // Create a conic gradient to represent the decreasing border
+  const percentage = ((3600 - timeLeft) / 3600) * 100;
   const borderStyle = {
     backgroundImage: `conic-gradient(
       #ffecec ${percentage}%,
@@ -116,17 +115,20 @@ const Final = () => {
           url: window.location.href,
         });
         toast.dismiss();
-      toast((t) => (
-        <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
-          <b>Produkt hinzugefügt!</b>
-          <button className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1" onClick={() => {
-            dispatch(toggleCart());
-            toast.dismiss();
-          }}>
-          Warenkorb
-          </button>
-        </span>
-      ));
+        toast((t) => (
+          <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
+            <b>Produkt hinzugefügt!</b>
+            <button
+              className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
+              onClick={() => {
+                dispatch(toggleCart());
+                toast.dismiss();
+              }}
+            >
+              Warenkorb
+            </button>
+          </span>
+        ));
       } catch (error) {
         toast.error("Fehler beim Teilen.");
       }
@@ -137,20 +139,19 @@ const Final = () => {
 
   return (
     <div className="pt-[8vh] w-full">
-      {/* Map showing the distance between the restaurant and user's location */}
-      <MapWithDistance origin={userLocation} destination={restaurantLocation} />
+      {/* <MapWithDistance origin={userLocation} destination={restaurantLocation} /> */}
 
-      {/* Rest of your Final page content */}
+      <div className="w-full flex items-center justify-center">
+      <img src={delivery} alt="" className="" />
+      </div>
 
-      <div className="w-full flex items-center justify-center relative -top-10 z-50">
+      <div className="w-full flex items-center justify-center relative mb-5 z-40">
         <div
           className={`w-20 h-20 rounded-full bg-[#e53535] flex items-center justify-center`}
         >
           {done ? (
-            // Display "Done" when the timer is finished
             <div className="text-white text-sm font-semibold">Geliefert!</div>
           ) : showCheckmark ? (
-            // Display the checkmark for the first 3 seconds
             <div className="w-full bg-[#e53935] h-full rounded-full flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -168,7 +169,6 @@ const Final = () => {
               </svg>
             </div>
           ) : (
-            // After the checkmark, display the countdown timer
             <div
               className="w-full h-full rounded-full flex items-center justify-center p-1"
               style={borderStyle}
@@ -189,8 +189,8 @@ const Final = () => {
               Ihre Bestellung wurde geliefert!
             </p>
             <p className="text-sm text-center">
-              Deine Bestellung bei Tasty Kitchen wurde an {order.street},
-              {order.postcode} München geliefert.
+              Deine Bestellung bei Tasty Kitchen wurde an {order.delivery.street}, {' '}
+              {order.delivery.postcode} München geliefert.
             </p>
           </>
         ) : (
@@ -205,10 +205,74 @@ const Final = () => {
           </>
         )}
 
-        <div className="flex flex-col items-center justify-center space-x-2">
+        {/* <div className="flex flex-col items-center justify-center space-x-2">
           <span className="text-[#e53935] text-base">Bestellnummer</span>
           <span className="font-semibold text-lg">#{order?.orderNumber}</span>
-        </div>
+        </div> */}
+
+        {order && (
+          <div className="w-full md:w-8/12 mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold mb-4 text-center">
+                {" "}
+                <span className="text-red-500">Bestellnummer</span> #
+                {order?.orderNumber}
+              </h2>
+
+              <div className="border-t border-gray-200">
+                {order.products.map((product, index) => (
+                  <div
+                    key={product._id}
+                    className="flex py-4 items-center border-b border-gray-200"
+                  >
+                    <div className="w-16 md:w-24 h-16 md:h-24 overflow-hidden rounded-lg">
+                      <img
+                        src={product.productId.image}
+                        alt={product.productId.name}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                    <div className="ml-4 flex-1">
+                      <h3 className="text-sm md:text-lg font-bold">
+                        {product.productId.name}
+                      </h3>
+                      {product.extras.map((extra) => {
+                        let name = product.productId.menuId.extras.find(
+                          (ext) => ext._id === extra
+                        ).name;
+                        return (
+                          <p key={extra} className="text-xs md:text-sm text-gray-600">
+                            {name}
+                          </p>
+                        );
+                      })}
+                      <div className="mt-2 text-sm md:text-base text-red-500 font-semibold">
+                        €{product.price.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="text-gray-500 text-sm">
+                      Qty: {product.quantity}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {order.delivery.note !== "" && (
+                <div className="flex flex-col space-y-2 my-3 border-b pb-3">
+                  <p className="font-bold">Delivery Note:</p>
+                  <p className="w-full break-words">{order.delivery.note}</p>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center mt-6">
+                <h3 className="text-lg font-bold">Total Price</h3>
+                <p className="text-xl font-semibold text-red-600">
+                  €{order.totalPrice.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <button
           onClick={handleShareClick}

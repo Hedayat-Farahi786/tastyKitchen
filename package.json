@@ -35,7 +35,8 @@
     "react-select": "^5.7.4",
     "react-slick": "^0.29.0",
     "slick-carousel": "^1.8.1",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.8.0",
+    "tastykitchen": "file:"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

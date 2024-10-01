@@ -15,14 +15,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 import io from "socket.io-client";
-const socket = io("http://localhost:5000", {
-  transports: ["websocket", "polling"], // Explicitly use WebSocket transport
-  path: "/socket",
-  reconnectionAttempts: 5,
-  timeout: 20000,
-  reconnection: true,
-  withCredentials: true
-});
+
+const socket = io("https://tastykitchen-websocket.up.railway.app");
 
 const payments = [
   {
@@ -127,10 +121,10 @@ const Checkout = () => {
     };
 
     axios
-      .post(`https://tastykitchen-backend.vercel.app/orders`, res)
+      .post(`http://tastykitchen-backend.vercel.app/orders`, res)
       .then((response) => {
         const order = response.data; // Get the order details from the response
-        socket.emit("new_order", response.data);
+        placeOrder(order);
         dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
         dispatch(resetCart());
         history.push("/done/" + order.orderNumber);
@@ -144,6 +138,11 @@ const Checkout = () => {
   const handlePaymentSelection = (option) => {
     setSelectedPayment(option);
     setIsModalOpen(false);
+  };
+
+  // Restaurant app (React)
+  const placeOrder = (orderData) => {
+    socket.emit("place-order", orderData); // Emit the order data to the server
   };
 
   useEffect(() => {
