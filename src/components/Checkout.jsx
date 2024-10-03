@@ -53,6 +53,7 @@ const payments = [
 const Checkout = () => {
   const [selectedPayment, setSelectedPayment] = useState(payments[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // const [userLocation, setUserLocation] = useState(null); // Store user's location
   const history = useHistory();
 
@@ -90,6 +91,7 @@ const Checkout = () => {
     }));
   }
   const onSubmit = (data) => {
+    setIsSubmitting(true);
     // if (userLocation) {
     //   // If user's location is available, add it to the form data
     //   data.latitude = userLocation.latitude;
@@ -127,11 +129,13 @@ const Checkout = () => {
         placeOrder(order);
         dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
         dispatch(resetCart());
+        setIsSubmitting(false);
         history.push("/done/" + order.orderNumber);
       })
       .catch(() => {
         toast.dismiss();
         toast.error("Fehler bei der Bestellung!");
+        setIsSubmitting(false);
       });
   };
 
@@ -403,7 +407,7 @@ const Checkout = () => {
           <button
             className="w-full md:w-max bg-primary text-white rounded-xl text-base md:text-lg px-10 py-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             type="submit"
-            disabled={cart.length === 0}
+            disabled={cart.length === 0 || isSubmitting}
           >
             Bestellen und bezahlen mit {selectedPayment.name} (
             {getCartTotal(cart)} €)
