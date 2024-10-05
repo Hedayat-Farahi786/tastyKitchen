@@ -53,6 +53,12 @@ const cartSlice = createSlice({
     toggleCart: (state) => {
       state.showCart = !state.showCart;
     },
+    openCart: (state) => {
+      state.showCart = true;
+    },
+    closeCart: (state) => {
+      state.showCart = false;
+    },
   },
 });
 
@@ -78,6 +84,6 @@ function areExtrasEqual(extras1, extras2) {
 }
 
 
-export const { addToCart, removeFromCart, resetCart, toggleCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, resetCart, toggleCart, openCart, closeCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

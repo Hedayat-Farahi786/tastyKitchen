@@ -10,24 +10,28 @@ import {
 } from "../store/productSlice";
 import ProductCard from "./ProductCard";
 import toast from "react-hot-toast";
-import { addToCart, toggleCart } from "../store/cart";
-import { useState } from "react";
-import { useEffect } from "react";
+import { addToCart, openCart } from "../store/cart";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import Skeleton from "react-loading-skeleton";
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch top 3 products with extras from your API
     axios
-      .get("https://tastykitchen-backend.vercel.app/products/top") // Change the URL to your API endpoint
+      .get("https://tastykitchen-backend.vercel.app/products/top")
       .then((response) => {
         const topProducts = response.data;
         setProducts(topProducts);
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching top products:", error);
+        setLoading(false);
       });
   }, []);
 
@@ -50,6 +54,7 @@ const Menu = () => {
         })
       );
       dispatch(setIsModalOpen(false));
+      dispatch(openCart());
       toast.dismiss();
       toast((t) => (
         <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
@@ -57,7 +62,7 @@ const Menu = () => {
           <button
             className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
             onClick={() => {
-              dispatch(toggleCart());
+              dispatch(openCart());
               toast.dismiss();
             }}
           >
@@ -88,14 +93,27 @@ const Menu = () => {
           Probieren Sie heute unsere drei top Gerichte.
         </p>
       </div>
-      {products.map((item, i) => (
-        <ProductCard
-          key={i}
-          product={item.product}
-          onChooseOptions={() => handleModalOpen(item.product, item.extras)}
-          productsView={false}
-        />
-      ))}
+      {loading ? (
+        // Render skeleton loaders while data is loading
+        Array(3)
+          .fill()
+          .map((_, i) => (
+            <div key={i} className="w-80 p-4">
+              <Skeleton height={200} />
+              <Skeleton count={2} />
+            </div>
+          ))
+      ) : (
+        // Render the actual product cards once data is loaded
+        products.map((item, i) => (
+          <ProductCard
+            key={i}
+            product={item.product}
+            onChooseOptions={() => handleModalOpen(item.product, item.extras)}
+            productsView={false}
+          />
+        ))
+      )}
     </div>
   );
 };

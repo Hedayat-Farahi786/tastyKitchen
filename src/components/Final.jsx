@@ -121,7 +121,7 @@ const Final = () => {
             <button
               className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
               onClick={() => {
-                dispatch(toggleCart());
+                dispatch(openCart());
                 toast.dismiss();
               }}
             >

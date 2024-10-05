@@ -2,6 +2,13 @@ import { Label, TextInput, Textarea, Tooltip } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import cashIcon from "../assets/cash.png";
 import klarnaIcon from "../assets/klarna.png";
 import paypalIcon from "../assets/paypal.png";
@@ -13,50 +20,81 @@ import { useHistory } from "react-router-dom";
 import { addOrder } from "../store/order";
 import axios from "axios";
 import toast from "react-hot-toast";
-
 import io from "socket.io-client";
-
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHED_KEY);
 const socket = io("https://tastykitchen-websocket.up.railway.app");
+
+const PaymentForm = ({ amount, onSuccess, onError }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: "if_required",
+      });
+
+      if (error) {
+        onError(error.message);
+      } else if (paymentIntent && paymentIntent.status === "succeeded") {
+        onSuccess(paymentIntent);
+      } else {
+        onError("Payment failed or was canceled.");
+      }
+    } catch (error) {
+      onError("An unexpected error occurred.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="mt-6">
+      <PaymentElement />
+      <button
+        onClick={(e) => handleSubmit(e)}
+        disabled={!stripe || isProcessing}
+        className="mt-6 w-full bg-primary text-white rounded-xl px-4 py-3 font-semibold disabled:opacity-50 hover:bg-primary/90 transition-colors"
+      >
+        {isProcessing ? "Verarbeitung..." : "Jetzt bezahlen"}
+      </button>
+    </div>
+  );
+};
 
 const payments = [
   {
     name: "Barzahlung",
     icon: cashIcon,
     title: "Bezahle mit",
-    info: "Barzahlung - Passend",
-  },
-  {
-    name: "Sofortüberweisung",
-    icon: klarnaIcon,
-    title: "Zahlungsvorgang mit",
-    info: "Sofortüberweisung",
-  },
-  {
-    name: "PayPal",
-    icon: paypalIcon,
-    title: "Zahlungsvorgang mit",
-    info: "Paypal",
+    info: "Summe",
   },
   {
     name: "Kreditkarte",
     icon: creditIcon,
     title: "Zahlungsvorgang mit",
-    info: "Kreditkarte",
-  },
-  {
-    name: "GiroPay",
-    icon: giroIcon,
-    title: "Zahlungsvorgang mit",
-    info: "GiroPay",
+    info: "Summe",
   },
 ];
+
 const Checkout = () => {
   const [selectedPayment, setSelectedPayment] = useState(payments[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [userLocation, setUserLocation] = useState(null); // Store user's location
+  const [clientSecret, setClientSecret] = useState("");
   const history = useHistory();
-
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.cart);
   const order = useSelector((state) => state.order.order);
 
   const {
@@ -64,23 +102,50 @@ const Checkout = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    getValues,
   } = useForm();
 
-  // const getLocation = () => {
-  //   if ("geolocation" in navigator) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const { latitude, longitude } = position.coords;
-  //         setUserLocation({ latitude, longitude });
-  //       },
-  //       (error) => {
-  //         console.error("Error getting user's location:", error);
-  //       }
-  //     );
-  //   } else {
-  //     console.error("Geolocation is not available in this browser.");
-  //   }
-  // };
+  useEffect(() => {
+    if (cart.length === 0) {
+      history.push("/products");
+    }
+  }, [cart.length, history]);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem("formData");
+    if (savedData) {
+      reset(JSON.parse(savedData));
+    }
+  }, [reset]);
+
+  useEffect(() => {
+    if (selectedPayment.name === "Kreditkarte") {
+      const createPaymentIntent = async () => {
+        try {
+          const response = await axios.post(
+            "https://tastykitchen-backend.vercel.app/api/create-payment-intent",
+            {
+              amount: Math.round(getCartTotal(cart) * 100), // Convert to cents
+              currency: "eur",
+            }
+          );
+          setClientSecret(response.data.clientSecret);
+        } catch (error) {
+          toast.error("Fehler beim Initialisieren der Zahlung");
+        }
+      };
+
+      createPaymentIntent();
+    }
+  }, [selectedPayment, cart]);
+
+  const getCartTotal = (cart) => {
+    let total = 0;
+    cart.forEach((item) => {
+      total += item.price * item.quantity;
+    });
+    return total;
+  };
 
   function modifyProductsArray(products) {
     return products.map((productItem) => ({
@@ -90,53 +155,54 @@ const Checkout = () => {
       price: productItem.price,
     }));
   }
-  const onSubmit = (data) => {
+
+  const placeOrder = (orderData) => {
+    socket.emit("place-order", orderData);
+  };
+
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
-    // if (userLocation) {
-    //   // If user's location is available, add it to the form data
-    //   data.latitude = userLocation.latitude;
-    //   data.longitude = userLocation.longitude;
-    // }
-
     localStorage.setItem("formData", JSON.stringify(data));
-    data.products = cart;
-    data.totalPrice = getCartTotal(cart);
-    data.payment = selectedPayment.name;
-    data.time = new Date().toLocaleString();
 
-    const res = {
-      customer: {
-        name: data.name,
-        phone: data.phone,
-      },
-      delivery: {
-        street: data.street,
-        postcode: data.postcode,
-        floor: data.floor,
-        company: data.company,
-        note: data.note,
-      },
-      products: modifyProductsArray(data.products),
-      totalPrice: data.totalPrice,
-      payment: data.payment,
-      time: new Date(),
-    };
+    try {
+      data.products = cart;
+      data.totalPrice = getCartTotal(cart);
+      data.payment = selectedPayment.name;
+      data.time = new Date().toLocaleString();
 
-    axios
-      .post(`https://tastykitchen-backend.vercel.app/orders`, res)
-      .then((response) => {
-        const order = response.data; // Get the order details from the response
-        placeOrder(order);
-        dispatch(addOrder(order)); // Dispatch an action to store the order in Redux
-        dispatch(resetCart());
-        setIsSubmitting(false);
-        history.push("/done/" + order.orderNumber);
-      })
-      .catch(() => {
-        toast.dismiss();
-        toast.error("Fehler bei der Bestellung!");
-        setIsSubmitting(false);
-      });
+      const res = {
+        customer: {
+          name: data.name,
+          phone: data.phone,
+        },
+        delivery: {
+          street: data.street,
+          postcode: data.postcode,
+          floor: data.floor,
+          company: data.company,
+          note: data.note,
+        },
+        products: modifyProductsArray(data.products),
+        totalPrice: data.totalPrice,
+        payment: data.payment,
+        time: new Date(),
+      };
+
+      const response = await axios.post(
+        `https://tastykitchen-backend.vercel.app/orders`,
+        res
+      );
+      const order = response.data;
+
+      placeOrder(order);
+      dispatch(addOrder(order));
+      // dispatch(resetCart());
+      history.push("/done/" + order.orderNumber);
+    } catch (error) {
+      toast.error("Fehler bei der Bestellung!");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePaymentSelection = (option) => {
@@ -144,36 +210,62 @@ const Checkout = () => {
     setIsModalOpen(false);
   };
 
-  // Restaurant app (React)
-  const placeOrder = (orderData) => {
-    socket.emit("place-order", orderData); // Emit the order data to the server
+  // Handle successful payment and place order
+  const handlePaymentSuccess = async (paymentIntent) => {
+    toast.success("Zahlung erfolgreich!");
+    const formData = getValues();
+    await onSubmit(formData); // This line was previously commented out
   };
 
-  useEffect(() => {
-    if (cart.length === 0) {
-      history.goBack();
+  const renderPaymentSection = () => {
+    if (selectedPayment.name === "Kreditkarte" && clientSecret) {
+      const options = {
+        clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: {
+            colorPrimary: "#017A39",
+            borderRadius: "0.75rem",
+          },
+          rules: {
+            ".Input": {
+              border: "1px solid #E5E7EB",
+              borderRadius: "0.5rem",
+            },
+          },
+        },
+      };
+
+      return (
+        <div className="my-10">
+          <Elements stripe={stripePromise} options={options}>
+            <PaymentForm
+              amount={getCartTotal(cart)}
+              onSuccess={handlePaymentSuccess}
+              onError={(error) => {
+                toast.error(error);
+              }}
+            />
+          </Elements>
+        </div>
+      );
     }
-  }, []);
 
-  useEffect(() => {
-    const savedData = localStorage.getItem("formData");
-    if (savedData) {
-      reset(JSON.parse(savedData));
-    }
-  }, [reset]);
-
-  const dispatch = useDispatch();
-
-  const cart = useSelector((state) => state.cart.cart);
-
-  const getCartTotal = (cart) => {
-    let total = 0;
-
-    cart.forEach((item) => {
-      total += item.price * item.quantity;
-    });
-
-    return total.toFixed(2);
+    return (
+      <div className="my-10">
+        <button
+          className="w-full md:w-max bg-primary text-white rounded-xl text-base md:text-lg px-10 py-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
+          type="submit"
+          disabled={cart.length === 0 || isSubmitting}
+        >
+          {isSubmitting
+            ? "Wird verarbeitet..."
+            : `Bestellen und bezahlen mit ${
+                selectedPayment.name
+              } (${getCartTotal(cart).toFixed(2)} €)`}
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -182,18 +274,10 @@ const Checkout = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="checkout__left w-full md:w-8/12 py-5 md:py-10"
       >
-        {/* <div className="flex items-center justify-center">
-          <button
-            type="button"
-            onClick={getLocation}
-            className="bg-primary text-white rounded-xl px-4 py-2 font-semibold"
-          >
-            Get My Location
-          </button>
-        </div> */}
         <p className="text-2xl md:text-3xl font-semibold mb-8 md:mb-10">
           Lieferadresse
         </p>
+
         <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
           <div className="w-full">
             <div className="mb-2 block">
@@ -234,6 +318,44 @@ const Checkout = () => {
             />
           </div>
         </div>
+
+        <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
+          <div className="w-full">
+            <div className="mb-2 block">
+              <Label htmlFor="name" value="Vor- und Zuname" />
+            </div>
+            <TextInput
+              id="name"
+              {...register("name", { required: true })}
+              placeholder="Trage deinen Vor- und Zunamen ein"
+              shadow
+              type="text"
+              name="name"
+              color={errors.name ? "failure" : ""}
+              helperText={errors.name && <span>Name erforderlich</span>}
+              className="w-full"
+            />
+          </div>
+          <div className="w-full">
+            <div className="mb-2 block">
+              <Label htmlFor="phone" value="Telefonnummer" />
+            </div>
+            <TextInput
+              id="phone"
+              {...register("phone", { required: true })}
+              placeholder="Trage deine Telefonnummer ein"
+              shadow
+              type="text"
+              name="phone"
+              color={errors.phone ? "failure" : ""}
+              helperText={
+                errors.phone && <span>Telefonnummer erforderlich</span>
+              }
+              className="w-full"
+            />
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
           <div className="w-full">
             <div className="mb-2 block">
@@ -264,44 +386,7 @@ const Checkout = () => {
             />
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
-          <div className="w-full">
-            <div className="mb-2 block">
-              <Label htmlFor="name" value="Vor- und Zuname" />
-            </div>
-            <TextInput
-              id="name"
-              {...register("name", { required: true })}
-              placeholder="Trage deinen Vor- und Zunamen ein"
-              shadow
-              type="text"
-              name="name"
-              color={errors.name ? "failure" : ""}
-              helperText={
-                errors.name && <span>Vollständiger Name erforderlich</span>
-              }
-              className="w-full"
-            />
-          </div>
-          <div className="w-full">
-            <div className="mb-2 block">
-              <Label htmlFor="phone" value="Telefonnummer" />
-            </div>
-            <TextInput
-              id="phone"
-              {...register("phone", { required: true })}
-              placeholder="Trage deine Telefonnummer ein, z.B. +49-XXXXXXXXXX"
-              shadow
-              type="text"
-              name="phone"
-              color={errors.phone ? "failure" : ""}
-              helperText={
-                errors.phone && <span>Telefonnummer erforderlich</span>
-              }
-              className="w-full"
-            />
-          </div>
-        </div>
+
         <div className="flex flex-col md:flex-row items-center justify-center md:space-x-5 md:mb-5 space-y-2 mb-2">
           <div className="w-full">
             <div className="mb-2 block">
@@ -312,15 +397,15 @@ const Checkout = () => {
               {...register("note")}
               placeholder="Bestellzettel..."
               shadow
-              type="text"
               name="note"
               rows={5}
               className="w-full resize-none"
             />
           </div>
         </div>
+
         <div className="flex flex-col space-y-5 mt-5">
-          <div className="w-full p-3 md:p-5 flex items-center justify-between border border-gray-300 cursor-pointer transition-all duration-200 linear hover:bg-[#f5f5f5] rounded-lg">
+          <div className="w-full p-3 md:p-5 flex items-center justify-between border border-gray-300 rounded-lg">
             <div className="flex items-center space-x-3 md:space-x-5">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -339,11 +424,10 @@ const Checkout = () => {
               <div>
                 <p className="font-semibold text-md">Lieferzeit</p>
                 <p className="text-xs md:text-sm">
-                  Geschätzte Ankunftszeit: 20-45 Min.
+                  Geschätzte Ankunftszeit: 30-60 Min.
                 </p>
               </div>
             </div>
-
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -359,9 +443,48 @@ const Checkout = () => {
               />
             </svg>
           </div>
+
+          {payments.map((option, i) => (
+            <div
+              key={i}
+              onClick={() => handlePaymentSelection(option)}
+              className="w-full p-3 md:p-5 flex items-center justify-between border border-gray-300 cursor-pointer transition-all duration-200 hover:bg-[#f5f5f5] rounded-lg"
+            >
+              <div className="flex items-center space-x-5">
+                <img
+                  className="w-6 md:w-8"
+                  src={option.icon}
+                  alt={option.name}
+                />
+                <p className="font-semibold text-md md:text-lg">
+                  {option.name}
+                </p>
+              </div>
+
+              {option.name === selectedPayment.name && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-5 md:w-6 h-5 md:h-6 text-[#017A39]"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              )}
+            </div>
+          ))}
+
+          <div className="w-full h-[1px] bg-gray-300"></div>
+
           <div
             onClick={() => setIsModalOpen(true)}
-            className="w-full p-3 md:p-5 flex items-center justify-between border border-gray-300 cursor-pointer transition-all duration-200 linear hover:bg-[#f5f5f5] rounded-lg"
+            className="w-full p-3 md:p-5 flex items-center justify-between border border-gray-300 cursor-pointer transition-all duration-200 hover:bg-[#f5f5f5] rounded-lg"
           >
             <div className="flex items-center space-x-3 md:space-x-5">
               <img
@@ -371,18 +494,13 @@ const Checkout = () => {
               />
               <div>
                 <p className="font-semibold text-md">
-                  {selectedPayment.name === "Barzahlung" ? (
-                    <span>Bezahle mit</span>
-                  ) : (
-                    <span>Zahlungsvorgang mit</span>
-                  )}
+                  <span>Bezahle mit</span>
                 </p>
                 <p className="text-xs md:text-sm">
-                  {selectedPayment.name === "Barzahlung" ? (
-                    <span>Barzahlung - Passend {getCartTotal(cart)}€</span>
-                  ) : (
-                    <span>{selectedPayment.name}</span>
-                  )}
+                  <span>
+                    {selectedPayment.name} - Summe{" "}
+                    {getCartTotal(cart).toFixed(2)} €
+                  </span>
                 </p>
               </div>
             </div>
@@ -403,18 +521,10 @@ const Checkout = () => {
             </svg>
           </div>
         </div>
-        <div className="my-10">
-          <button
-            className="w-full md:w-max bg-primary text-white rounded-xl text-base md:text-lg px-10 py-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            type="submit"
-            disabled={cart.length === 0 || isSubmitting}
-          >
-            Bestellen und bezahlen mit {selectedPayment.name} (
-            {getCartTotal(cart)} €)
-          </button>
-        </div>
 
-        <AnimatePresence>
+        {renderPaymentSection()}
+
+        {/* <AnimatePresence>
           {isModalOpen && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -447,7 +557,7 @@ const Checkout = () => {
                     <div
                       key={i}
                       onClick={() => handlePaymentSelection(option)}
-                      className="w-full p-3 md:p-5 flex items-center justify-between border border-gray-300 cursor-pointer transition-all duration-200 linear hover:bg-[#f5f5f5] rounded-lg"
+                      className="w-full p-3 md:p-5 flex items-center justify-between border border-gray-300 cursor-pointer transition-all duration-200 hover:bg-[#f5f5f5] rounded-lg"
                     >
                       <div className="flex items-center space-x-5">
                         <img
@@ -455,7 +565,6 @@ const Checkout = () => {
                           src={option.icon}
                           alt={option.name}
                         />
-
                         <p className="font-semibold text-md md:text-lg">
                           {option.name}
                         </p>
@@ -483,8 +592,9 @@ const Checkout = () => {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
+        </AnimatePresence> */}
       </form>
+
       <div className="checkout__right hidden md:block w-4/12 py-5 md:py-10">
         <div className="w-full flex items-center justify-between">
           <p className="font-semibold text-xl">Warenkorb</p>
@@ -509,7 +619,7 @@ const Checkout = () => {
                         </span>
                       </p>
                       <p className="text-xs text-gray-600">
-                        {item.price.toFixed(2)}€
+                        {item.price.toFixed(2)} €
                       </p>
                       {item.extras.length > 0 && (
                         <Tooltip
@@ -527,7 +637,7 @@ const Checkout = () => {
                   </div>
                   <div className="flex flex-col items-end justify-between">
                     <p className="font-semibold text-sm">
-                      {(item.price * item.quantity).toFixed(2)}€
+                      {(item.price * item.quantity).toFixed(2)} €
                     </p>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -561,7 +671,7 @@ const Checkout = () => {
           <div className="flex items-center justify-between mt-4">
             <p className="uppercase font-medium">Gesamt</p>
             <p className="text-xl text-primary font-semibold">
-              {getCartTotal(cart)}€
+              {getCartTotal(cart).toFixed(2)} €
             </p>
           </div>
         </div>

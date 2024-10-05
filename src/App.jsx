@@ -19,7 +19,7 @@ import {
 } from "./store/productSlice";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import Landing from "./components/Landing";
-import { addToCart, toggleCart } from "./store/cart";
+import { addToCart, openCart, toggleCart } from "./store/cart";
 import toast, { Toaster } from "react-hot-toast";
 import Checkout from "./components/Checkout";
 import Final from "./components/Final";
@@ -71,6 +71,7 @@ const App = () => {
         quantity,
       })
     );
+    dispatch(openCart());
     dispatch(setIsModalOpen(false));
     toast.dismiss();
     toast((t) => (
@@ -79,7 +80,7 @@ const App = () => {
         <button
           className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
           onClick={() => {
-            dispatch(toggleCart());
+            dispatch(openCart());
             toast.dismiss();
           }}
         >
@@ -102,177 +103,181 @@ const App = () => {
   }, [selectedOption, selectedToppings, quantity]);
 
   return (
-    <>
-      {isLoadingComplete ? (
-        <div className="w-full overflow-x-hidden relative">
-          <Router>
-            <Toaster position="bottom-center" />
-            <Flowbite theme={{ theme: customTheme }}>
-              <Navbar />
-              <Switch>
-                <Route exact path="/" component={Landing} />
-                <Route path="/products" component={Products} />
-                <Route path="/contact" component={Contact} />
-                <Route path="/checkout" component={Checkout} />
-                <Route path="/done/:orderNumber" component={Final} />
-              </Switch>
-            </Flowbite>
-          </Router>
+    <div className="w-full overflow-x-hidden relative">
+    <Router>
+      <Toaster position="bottom-center" />
+      <Flowbite theme={{ theme: customTheme }}>
+        <Navbar />
+        <Switch>
+          <Route exact path="/" component={Landing} />
+          <Route path="/products" component={Products} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/checkout" component={Checkout} />
+          <Route path="/done/:orderNumber" component={Final} />
+        </Switch>
+      </Flowbite>
+    </Router>
 
-          {/* Modal */}
+    {/* Modal */}
 
-          <AnimatePresence>
-            {isModalOpen && selectedProduct && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 flex items-end md:items-center justify-center z-50 bg-opacity-50 bg-black"
+    <AnimatePresence>
+      {isModalOpen && selectedProduct && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 flex items-end md:items-center justify-center z-50 bg-opacity-50 bg-black"
+        >
+          <div className="bg-white rounded-t-lg md:rounded-lg w-full md:w-6/12 h-[90%] p-6 md:p-10 flex flex-col justify-between">
+            <div className="flex items-start justify-between">
+              <div className="flex flex-col mb-4 space-y-2">
+                <h2 className="text-2xl font-semibold">
+                  {selectedProduct.name}
+                </h2>
+                <p className="text-xs text-gray-600">
+                  {selectedProduct.description}
+                </p>
+                <h2 className="text-xl md:text-2xl font-semibold text-primary">
+                  {totalPrice.toFixed(2)} €
+                </h2>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="w-8 h-8 cursor-pointer"
+                onClick={handleModalClose}
               >
-                <div className="bg-white rounded-t-lg md:rounded-lg w-full md:w-6/12 h-[90%] p-6 md:p-10 flex flex-col justify-between">
-                  <div className="flex items-start justify-between">
-                    <div className="flex flex-col mb-4 space-y-2">
-                      <h2 className="text-2xl font-semibold">
-                        {selectedProduct.name}
-                      </h2>
-                      <p className="text-xs text-gray-600">
-                        {selectedProduct.description}
-                      </p>
-                      <h2 className="text-xl md:text-2xl font-semibold text-primary">
-                        {totalPrice.toFixed(2)}€
-                      </h2>
-                    </div>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="w-8 h-8 cursor-pointer"
-                      onClick={handleModalClose}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
+            <div className="bg-gray-100 p-5 rounded overflow-y-scroll max-h-11/12">
+              {selectedProduct.options.length > 0 && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm font-semibold mb-2">
+                    {selectedProduct.optionsTitle}
+                  </p>
+                  {selectedProduct.options.map((option, i) => (
+                    <label
+                      className="pl-2 flex items-center space-x-3 cursor-pointer"
+                      key={i}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
+                      <input
+                        checked={selectedOption === option}
+                        onChange={() => handleOptionChange(option)}
+                        className="text-primary focus:ring-[#E53935]"
+                        type="radio"
                       />
-                    </svg>
-                  </div>
-                  <div className="bg-gray-100 p-5 rounded overflow-y-scroll max-h-11/12">
-                    {selectedProduct.options.length > 0 && (
-                      <div className="flex flex-col gap-3">
-                        <p className="text-sm font-semibold mb-2">
-                          {selectedProduct.optionsTitle}
-                        </p>
-                        {selectedProduct.options.map((option, i) => (
-                          <label
-                            className="pl-2 flex items-center space-x-3 cursor-pointer"
-                            key={i}
-                          >
-                            <input
-                              checked={selectedOption === option}
-                              onChange={() => handleOptionChange(option)}
-                              className="text-primary focus:ring-[#E53935]"
-                              type="radio"
-                            />
-                            <div className="flex items-center space-x-2">
-                              <p className="text-sm">{option.size}</p>
-                              <span className="text-xs text-gray-500">
-                                {option.price.toFixed(2)}€
-                              </span>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                    {extras.length > 0 && (
-                      <>
-                        <div className="w-full h-[1px] bg-gray-300 my-5"></div>
-                        {selectedProduct.options.length > 0 && (
-                          <div className="flex flex-col gap-3">
-                            <p className="text-sm font-semibold mb-2">
-                              Extras:
-                            </p>
-                            {extras.map((topping, i) => (
-                              <label
-                                className="pl-2 flex items-center space-x-3 cursor-pointer"
-                                key={i}
-                              >
-                                <input
-                                  type="checkbox"
-                                  className="text-primary focus:ring-[#E53935]"
-                                  checked={selectedToppings.some(
-                                    (item) => item.name === topping.name
-                                  )}
-                                  onChange={() => handleToppingsChange(topping)}
-                                />
-                                <div className="flex items-center space-x-2">
-                                  <p className="text-sm">{topping.name}</p>
-                                  <span className="text-xs text-gray-500">
-                                    {topping.price.toFixed(2)}€
-                                  </span>
-                                </div>
-                              </label>
-                            ))}
-
-                            {/* {extras.map((topping, i) => (
-                      <div className="pl-2 flex items-center space-x-3" key={i}>
-                        <input
-                          type="checkbox"
-                          className="text-primary focus:ring-[#E53935] cursor-pointer"
-                          checked={selectedToppings.some(
-                            (item) => item.name === topping.name
-                          )}
-                          onChange={() => handleToppingsChange(topping)}
-                        />
-                        <p className="text-sm">{topping.name}</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm">{option.size}</p>
                         <span className="text-xs text-gray-500">
-                          {topping.price.toFixed(2)}€
+                          {option.price.toFixed(2)} €
                         </span>
                       </div>
-                    ))} */}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+              {extras.length > 0 && (
+                <>
+                  <div className="w-full h-[1px] bg-gray-300 my-5"></div>
                   {selectedProduct.options.length > 0 && (
-                    <div className="flex items-center justify-between space-x-5 mt-10">
-                      <div className="flex items-center gap-5">
-                        <button
-                          onClick={() =>
-                            dispatch(setQuantity(Math.max(1, quantity - 1)))
-                          }
-                          className="px-4 py-2 bg-gray-200 text-2xl rounded-full focus:outline-none"
+                    <div className="flex flex-col gap-3">
+                      <p className="text-sm font-semibold mb-2">
+                        Extras:
+                      </p>
+                      {extras.map((topping, i) => (
+                        <label
+                          className="pl-2 flex items-center space-x-3 cursor-pointer"
+                          key={i}
                         >
-                          -
-                        </button>
-                        <p className="font-medium text-lg">{quantity}</p>
-                        <button
-                          onClick={() => dispatch(setQuantity(quantity + 1))}
-                          className="px-4 py-2 bg-gray-200 text-2xl rounded-full focus:outline-none"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <button
-                        onClick={handleAddToBasket}
-                        className="flex-1 bg-primary text-white font-semibold py-2 px-4 rounded-full text-2xl shadow"
-                      >
-                        {totalPrice.toFixed(2)} €
-                      </button>
+                          <input
+                            type="checkbox"
+                            className="text-primary focus:ring-[#E53935]"
+                            checked={selectedToppings.some(
+                              (item) => item.name === topping.name
+                            )}
+                            onChange={() => handleToppingsChange(topping)}
+                          />
+                          <div className="flex items-center space-x-2">
+                            <p className="text-sm">{topping.name}</p>
+                            <span className="text-xs text-gray-500">
+                              {topping.price.toFixed(2)} €
+                            </span>
+                          </div>
+                        </label>
+                      ))}
+
+                      {/* {extras.map((topping, i) => (
+                <div className="pl-2 flex items-center space-x-3" key={i}>
+                  <input
+                    type="checkbox"
+                    className="text-primary focus:ring-[#E53935] cursor-pointer"
+                    checked={selectedToppings.some(
+                      (item) => item.name === topping.name
+                    )}
+                    onChange={() => handleToppingsChange(topping)}
+                  />
+                  <p className="text-sm">{topping.name}</p>
+                  <span className="text-xs text-gray-500">
+                    {topping.price.toFixed(2)} €
+                  </span>
+                </div>
+              ))} */}
                     </div>
                   )}
+                </>
+              )}
+            </div>
+            {selectedProduct.options.length > 0 && (
+              <div className="flex items-center justify-between space-x-5 mt-10">
+                <div className="flex items-center gap-5">
+                  <button
+                    onClick={() =>
+                      dispatch(setQuantity(Math.max(1, quantity - 1)))
+                    }
+                    className="px-4 py-2 bg-gray-200 text-2xl rounded-full focus:outline-none"
+                  >
+                    -
+                  </button>
+                  <p className="font-medium text-lg">{quantity}</p>
+                  <button
+                    onClick={() => dispatch(setQuantity(quantity + 1))}
+                    className="px-4 py-2 bg-gray-200 text-2xl rounded-full focus:outline-none"
+                  >
+                    +
+                  </button>
                 </div>
-              </motion.div>
+                <button
+                  onClick={handleAddToBasket}
+                  className="flex-1 bg-primary text-white font-semibold py-2 px-4 rounded-full text-2xl shadow"
+                >
+                  {totalPrice.toFixed(2)} €
+                </button>
+              </div>
             )}
-          </AnimatePresence>
-        </div>
-      ) : (
-        <LoadingPage setLoadingComplete={handleLoadingComplete} />
+          </div>
+        </motion.div>
       )}
-    </>
+    </AnimatePresence>
+  </div>
   );
+
+  // return (
+  //   <>
+  //     {isLoadingComplete ? (
+    
+  //     ) : (
+  //       <LoadingPage setLoadingComplete={handleLoadingComplete} />
+  //     )}
+  //   </>
+  // );
 };
 
 export default App;

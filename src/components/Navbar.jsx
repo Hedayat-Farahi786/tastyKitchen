@@ -353,7 +353,7 @@ const Navbar = () => {
                             </span>
                           </p>
                           <p className="text-xs text-gray-600">
-                            {item.price.toFixed(2)}€
+                            {item.price.toFixed(2)} €
                           </p>
                           {item.extras.length > 0 && (
                             <Tooltip
@@ -371,7 +371,7 @@ const Navbar = () => {
                       </div>
                       <div className="flex flex-col items-end justify-between">
                         <p className="font-semibold text-sm">
-                          {(item.price * item.quantity).toFixed(2)}€
+                          {(item.price * item.quantity).toFixed(2)} €
                         </p>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -405,9 +405,10 @@ const Navbar = () => {
               <div className="flex items-center justify-between mt-4">
                 <p className="uppercase font-medium">Gesamt</p>
                 <p className="text-xl text-primary font-semibold">
-                  {getCartTotal(cart)}€
+                  {getCartTotal(cart)} €
                 </p>
               </div>
+              
 
               <Link to="/checkout">
                 <div
@@ -430,6 +431,16 @@ const Navbar = () => {
                     />
                   </svg>
                 </div>
+              </Link>
+              <Link
+                to="/products"
+              >
+              <div
+              onClick={handleCartToggle}
+                className="w-full text-center mt-5 border px-4 py-1 rounded border-[#E53935] text-primary transition-all duration-200 linear cursor-pointer hover:bg-[#ffeded9d]"
+              >
+                Mehr hinzufügen
+              </div>
               </Link>
             </div>
           ) : (

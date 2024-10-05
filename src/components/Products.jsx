@@ -13,8 +13,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import NoProducts from "../assets/productNoResult.png";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { addToCart, toggleCart } from "../store/cart";
-import LoadingPage from "./LoadingPage";
+import { addToCart, openCart, toggleCart } from "../store/cart";
+import Loader from "./Loader";
 
 const Products = ({ dark }) => {
   const [items, setItems] = useState([]);
@@ -84,6 +84,7 @@ const Products = ({ dark }) => {
           quantity: 1,
         })
       );
+      dispatch(openCart());
       toast.dismiss();
       toast((t) => (
         <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
@@ -91,7 +92,7 @@ const Products = ({ dark }) => {
           <button
             className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
             onClick={() => {
-              dispatch(toggleCart());
+              dispatch(openCart());
               toast.dismiss();
             }}
           >
@@ -116,7 +117,7 @@ const Products = ({ dark }) => {
   return (
     <div className={`w-full ${dark ? "bg-[#f5f5f5] pb-10 " : ""}`}>
       {isLoading ? (
-       <LoadingPage />
+     <Loader />
       ) : (
         <div>
           <div className="flex px-6 md:px-20 space-x-3 shadow-inner pt-24 md:pt-28">
