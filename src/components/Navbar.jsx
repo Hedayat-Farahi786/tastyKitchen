@@ -69,204 +69,210 @@ const Navbar = () => {
 
   return (
     <>
-    <nav
-      className={`w-full h-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 fixed top-0 z-40 transition-all duration-500 ease-in-out ${
-        !isHomeRoute || scrollPosition > 20
-          ? "bg-white/98 backdrop-blur-md shadow-sm border-b border-gray-200"
-          : "bg-transparent border-b border-transparent"
-      }`}
-    >
-      <div className="flex justify-between items-center py-2 md:py-3 lg:py-4 max-w-screen-2xl mx-auto">
-        {/* Left side - Logo */}
-        <div className="flex justify-start">
-          <Link
-            to="/"
-            className="transition-transform hover:scale-105 duration-200"
-          >
-            <img
-              className="h-8 w-auto sm:h-9 md:h-10 lg:h-11"
-              src={logo}
-              alt="Logo"
-            />
-          </Link>
-        </div>
-
-        {/* Middle - Links */}
-        <div
-          className={`hidden md:flex items-center space-x-6 lg:space-x-12 xl:space-x-16 text-sm lg:text-base font-bold transition-colors duration-300 ${
-            !isHomeRoute || scrollPosition > 20 ? "text-gray-700" : "text-white"
-          }`}
-          style={
-            !isHomeRoute || scrollPosition > 20
-              ? {}
-              : { textShadow: "0 2px 8px rgba(0,0,0,0.8)" }
-          }
-        >
-          <Link
-            to="/"
-            className="relative py-2 px-3 transition-all duration-200 hover:text-primary group"
-          >
-            Startseite
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-          </Link>
-          <Link
-            to="/products"
-            className="relative py-2 px-3 transition-all duration-200 hover:text-primary group"
-          >
-            Menü
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-          </Link>
-          <ScrollLink
-            to="contact-section"
-            smooth={true}
-            duration={500}
-            offset={0}
-            onClick={() => {
-              if (location.pathname !== "/") {
-                window.location.href = "/#contact-section";
-              }
-            }}
-            className="relative py-2 px-3 transition-all duration-200 hover:text-primary cursor-pointer group"
-          >
-            Kontakt
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-          </ScrollLink>
-        </div>
-
-        {/* Right side - Shopping Cart & CTA */}
-        <div
-          className={`hidden md:flex items-center space-x-4 lg:space-x-6 transition-colors duration-300 ${
-            !isHomeRoute || scrollPosition > 20 ? "text-gray-700" : "text-white"
-          }`}
-          style={
-            !isHomeRoute || scrollPosition > 20
-              ? {}
-              : { filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.8))" }
-          }
-        >
-          {/* Order Now Button - Only show when scrolled or not on home */}
-          {(!isHomeRoute || scrollPosition > 20) && (
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
+      <nav
+        className={`w-full h-auto px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 fixed top-0 z-40 transition-all duration-500 ease-in-out ${
+          !isHomeRoute || scrollPosition > 20
+            ? "bg-white/98 backdrop-blur-md shadow-sm border-b border-gray-200"
+            : "bg-transparent border-b border-transparent"
+        }`}
+      >
+        <div className="flex justify-between items-center py-2 md:py-3 lg:py-4 max-w-screen-2xl mx-auto">
+          {/* Left side - Logo */}
+          <div className="flex justify-start">
+            <Link
+              to="/"
+              className="transition-transform hover:scale-105 duration-200"
             >
-              <Link
-                to="/products"
-                className="hidden lg:flex items-center space-x-2 bg-gradient-to-r from-primary to-red-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 hover:scale-105"
+              <img
+                className="h-8 w-auto sm:h-9 md:h-10 lg:h-11"
+                src={logo}
+                alt="Logo"
+              />
+            </Link>
+          </div>
+
+          {/* Middle - Links */}
+          <div
+            className={`hidden md:flex items-center space-x-6 lg:space-x-12 xl:space-x-16 text-sm lg:text-base font-bold transition-colors duration-300 ${
+              !isHomeRoute || scrollPosition > 20
+                ? "text-gray-700"
+                : "text-white"
+            }`}
+            style={
+              !isHomeRoute || scrollPosition > 20
+                ? {}
+                : { textShadow: "0 2px 8px rgba(0,0,0,0.8)" }
+            }
+          >
+            <Link
+              to="/"
+              className="relative py-2 px-3 transition-all duration-200 hover:text-primary group"
+            >
+              Startseite
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            </Link>
+            <Link
+              to="/products"
+              className="relative py-2 px-3 transition-all duration-200 hover:text-primary group"
+            >
+              Menü
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            </Link>
+            <ScrollLink
+              to="contact-section"
+              smooth={true}
+              duration={500}
+              offset={0}
+              onClick={() => {
+                if (location.pathname !== "/") {
+                  window.location.href = "/#contact-section";
+                }
+              }}
+              className="relative py-2 px-3 transition-all duration-200 hover:text-primary cursor-pointer group"
+            >
+              Kontakt
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+            </ScrollLink>
+          </div>
+
+          {/* Right side - Shopping Cart & CTA */}
+          <div
+            className={`hidden md:flex items-center space-x-4 lg:space-x-6 transition-colors duration-300 ${
+              !isHomeRoute || scrollPosition > 20
+                ? "text-gray-700"
+                : "text-white"
+            }`}
+            style={
+              !isHomeRoute || scrollPosition > 20
+                ? {}
+                : { filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.8))" }
+            }
+          >
+            {/* Order Now Button - Only show when scrolled or not on home */}
+            {(!isHomeRoute || scrollPosition > 20) && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2 }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="currentColor"
-                  className="w-4 h-4"
+                <Link
+                  to="/products"
+                  className="hidden lg:flex items-center space-x-2 bg-gradient-to-r from-primary to-red-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 hover:scale-105"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span>Jetzt bestellen</span>
-              </Link>
-            </motion.div>
-          )}
-
-          <button
-            onClick={handleCartToggle}
-            className="relative inline-flex items-center justify-center p-2.5 lg:p-3 rounded-xl hover:bg-primary/10 transition-all duration-200 group"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.8"
-              stroke="currentColor"
-              className="w-6 h-6 lg:w-7 lg:h-7 group-hover:text-primary transition-colors duration-200"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-              />
-            </svg>
-            {getCartLength(cart) > 0 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 bg-gradient-to-br from-primary to-red-600 text-white rounded-full w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center text-xs font-bold shadow-md"
-              >
-                {getCartLength(cart)}
-              </motion.span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2.5}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Jetzt bestellen</span>
+                </Link>
+              </motion.div>
             )}
-          </button>
-        </div>
 
-        {/* Mobile menu icon and cart */}
-        <div
-          className={`md:hidden flex items-center space-x-3 transition-colors duration-300 ${
-            !isHomeRoute || scrollPosition > 20 ? "text-gray-700" : "text-white"
-          }`}
-          style={
-            !isHomeRoute || scrollPosition > 20
-              ? {}
-              : { filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.8))" }
-          }
-        >
-          <button
-            onClick={handleCartToggle}
-            className="relative inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-primary/10 transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.8"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-              />
-            </svg>
-            {getCartLength(cart) > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg">
-                {getCartLength(cart)}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={handleMenuToggle}
-            className="p-1.5 rounded-lg hover:bg-primary/10 transition-all duration-200"
-          >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <button
+              onClick={handleCartToggle}
+              className="relative inline-flex items-center justify-center p-2.5 lg:p-3 rounded-xl hover:bg-primary/10 transition-all duration-200 group"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth="2"
+                strokeWidth="1.8"
+                stroke="currentColor"
+                className="w-6 h-6 lg:w-7 lg:h-7 group-hover:text-primary transition-colors duration-200"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                />
+              </svg>
+              {getCartLength(cart) > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 bg-gradient-to-br from-primary to-red-600 text-white rounded-full w-5 h-5 lg:w-6 lg:h-6 flex items-center justify-center text-xs font-bold shadow-md"
+                >
+                  {getCartLength(cart)}
+                </motion.span>
+              )}
+            </button>
+          </div>
+
+          {/* Mobile menu icon and cart */}
+          <div
+            className={`md:hidden flex items-center space-x-3 transition-colors duration-300 ${
+              !isHomeRoute || scrollPosition > 20
+                ? "text-gray-700"
+                : "text-white"
+            }`}
+            style={
+              !isHomeRoute || scrollPosition > 20
+                ? {}
+                : { filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.8))" }
+            }
+          >
+            <button
+              onClick={handleCartToggle}
+              className="relative inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-primary/10 transition-all duration-200"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.8"
                 stroke="currentColor"
                 className="w-6 h-6"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
                 />
               </svg>
-            </motion.div>
-          </button>
+              {getCartLength(cart) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-lg">
+                  {getCartLength(cart)}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={handleMenuToggle}
+              className="p-1.5 rounded-lg hover:bg-primary/10 transition-all duration-200"
+            >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
+                </svg>
+              </motion.div>
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
       {/* Mobile menu */}
       {showMenu && (
