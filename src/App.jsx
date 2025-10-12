@@ -6,7 +6,7 @@ import { Flowbite } from "flowbite-react";
 import LoadingPage from "./components/LoadingPage";
 import Products from "./components/Products";
 import Contact from "./components/Contact";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -33,6 +33,7 @@ const customTheme = {
 
 const App = () => {
   const [isLoadingComplete, setIsLoadingComplete] = useState(false);
+  const scrollPosition = useRef(0);
 
   const isModalOpen = useSelector((state) => state.product.isModalOpen);
   const selectedProduct = useSelector((state) => state.product.selectedProduct);
@@ -73,26 +74,99 @@ const App = () => {
     );
     dispatch(openCart());
     dispatch(setIsModalOpen(false));
-    toast.dismiss();
-    toast((t) => (
-      <span className="text-xs md:text-sm flex items-center justify-center space-x-3">
-        <b>Produkt hinzugefügt!</b>
-        <button
-          className="border border-[#e53935] text-[#e53935] rounded-md px-2 py-1"
-          onClick={() => {
-            dispatch(openCart());
-            toast.dismiss();
-          }}
-        >
-          Warenkorb
-        </button>
-      </span>
-    ));
+    // toast.dismiss();
+    // toast.success(
+    //   (t) => (
+    //     <div className="flex items-center gap-3 py-1">
+    //       <div className="flex items-center gap-2">
+    //         <span className="font-semibold text-gray-800">Zum Warenkorb hinzugefügt!</span>
+    //       </div>
+    //       <button
+    //         onClick={() => {
+    //           dispatch(openCart());
+    //           toast.dismiss(t.id);
+    //         }}
+    //         className="ml-2 bg-primary hover:bg-primary/90 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
+    //       >
+    //         Warenkorb ansehen
+    //       </button>
+    //     </div>
+    //   ),
+    //   {
+    //     duration: 4000,
+    //     style: {
+    //       background: '#fff',
+    //       color: '#363636',
+    //       padding: '12px 16px',
+    //       borderRadius: '12px',
+    //       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    //       border: '1px solid #e5e7eb',
+    //       maxWidth: '500px',
+    //     },
+    //   }
+    // );
   };
 
   const handleLoadingComplete = (complete) => {
     setIsLoadingComplete(complete);
   };
+
+  // Lock body scroll when modal is open with smooth experience
+  useEffect(() => {
+    if (isModalOpen) {
+      // Save current scroll position
+      scrollPosition.current = window.scrollY;
+
+      // Temporarily disable smooth scrolling
+      const htmlElement = document.documentElement;
+      const originalScrollBehavior = htmlElement.style.scrollBehavior;
+      htmlElement.style.scrollBehavior = "auto";
+
+      // Apply styles in the correct order to prevent visual jump
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollPosition.current}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+
+      // Store original scroll behavior for cleanup
+      document.body.dataset.originalScrollBehavior = originalScrollBehavior;
+    } else if (scrollPosition.current !== undefined) {
+      // Get the saved scroll position
+      const savedScrollY = scrollPosition.current;
+
+      // Temporarily disable smooth scrolling for instant restoration
+      const htmlElement = document.documentElement;
+      htmlElement.style.scrollBehavior = "auto";
+
+      // Remove fixed positioning first
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = "";
+
+      // Restore scroll position immediately without animation
+      window.scrollTo(0, savedScrollY);
+
+      // Restore smooth scrolling after a brief delay
+      setTimeout(() => {
+        htmlElement.style.scrollBehavior =
+          document.body.dataset.originalScrollBehavior || "";
+        delete document.body.dataset.originalScrollBehavior;
+      }, 50);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.scrollBehavior = "";
+    };
+  }, [isModalOpen]);
 
   useEffect(() => {
     let totalPrice = selectedOption?.price || 0;
@@ -104,175 +178,277 @@ const App = () => {
 
   return (
     <div className="w-full overflow-x-hidden relative">
-    <Router>
-      <Toaster position="bottom-center" />
-      <Flowbite theme={{ theme: customTheme }}>
-        <Navbar />
-        <Switch>
-          <Route exact path="/" component={Landing} />
-          <Route path="/products" component={Products} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/checkout" component={Checkout} />
-          <Route path="/done/:orderNumber" component={Final} />
-        </Switch>
-      </Flowbite>
-    </Router>
+      <Router>
+        <Toaster position="bottom-center" />
+        <Flowbite theme={{ theme: customTheme }}>
+          <Navbar />
+          <Switch>
+            <Route exact path="/" component={Landing} />
+            <Route path="/products" component={Products} />
+            <Route path="/contact" component={Contact} />
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/done/:orderNumber" component={Final} />
+          </Switch>
+        </Flowbite>
+      </Router>
 
-    {/* Modal */}
-
-    <AnimatePresence>
-      {isModalOpen && selectedProduct && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 flex items-end md:items-center justify-center z-50 bg-opacity-50 bg-black"
-        >
-          <div className="bg-white rounded-t-lg md:rounded-lg w-full md:w-6/12 h-[90%] p-6 md:p-10 flex flex-col justify-between">
-            <div className="flex items-start justify-between">
-              <div className="flex flex-col mb-4 space-y-2">
-                <h2 className="text-2xl font-semibold">
-                  {selectedProduct.name}
-                </h2>
-                <p className="text-xs text-gray-600">
-                  {selectedProduct.description}
-                </p>
-                <h2 className="text-xl md:text-2xl font-semibold text-primary">
-                  {totalPrice.toFixed(2)} €
-                </h2>
+      {/* Enhanced Product Options Modal - Full Width Mobile with Bottom Sheet */}
+      <AnimatePresence>
+        {isModalOpen && selectedProduct && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 flex items-end justify-center z-50 bg-black/50"
+            onClick={handleModalClose}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white w-full md:max-w-2xl md:rounded-t-2xl overflow-hidden flex flex-col"
+              style={{
+                height: "auto",
+                maxHeight: "85vh",
+              }}
+            >
+              {/* Drag Handle - Mobile Only */}
+              <div className="md:hidden flex justify-center pt-2 pb-1 bg-white">
+                <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
               </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-8 h-8 cursor-pointer"
-                onClick={handleModalClose}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </div>
-            <div className="bg-gray-100 p-5 rounded overflow-y-scroll max-h-11/12">
-              {selectedProduct.options.length > 0 && (
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm font-semibold mb-2">
-                    {selectedProduct.optionsTitle}
-                  </p>
-                  {selectedProduct.options.map((option, i) => (
-                    <label
-                      className="pl-2 flex items-center space-x-3 cursor-pointer"
-                      key={i}
-                    >
-                      <input
-                        checked={selectedOption === option}
-                        onChange={() => handleOptionChange(option)}
-                        className="text-primary focus:ring-[#E53935]"
-                        type="radio"
-                      />
-                      <div className="flex items-center space-x-2">
-                        <p className="text-sm">{option.size}</p>
-                        <span className="text-xs text-gray-500">
-                          {option.price.toFixed(2)} €
-                        </span>
-                      </div>
-                    </label>
-                  ))}
+
+              {/* Header with Product Info - Clean White Design */}
+              <div className="relative bg-white border-b border-gray-100 p-4 md:p-6 flex-shrink-0">
+                {/* Close Button */}
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleModalClose}
+                  className="absolute top-3 right-3 md:top-4 md:right-4 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-all duration-300 z-10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2.5"
+                    stroke="currentColor"
+                    className="w-5 h-5 md:w-6 md:h-6 text-gray-600"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </motion.button>
+
+                {/* Product Details */}
+                <div className="pr-10 md:pr-12">
+                  <motion.h2
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-lg md:text-2xl font-bold mb-1.5 text-gray-900"
+                  >
+                    {selectedProduct.name}
+                  </motion.h2>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-gray-600 text-xs md:text-sm leading-relaxed mb-2"
+                  >
+                    {selectedProduct.description}
+                  </motion.p>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="inline-flex items-center space-x-2 bg-primary/5 border border-primary/20 px-3 py-1.5 rounded-full"
+                  >
+                    <span className="text-base md:text-xl font-bold text-primary">
+                      {totalPrice.toFixed(2)} €
+                    </span>
+                  </motion.div>
                 </div>
-              )}
-              {extras.length > 0 && (
-                <>
-                  <div className="w-full h-[1px] bg-gray-300 my-5"></div>
-                  {selectedProduct.options.length > 0 && (
-                    <div className="flex flex-col gap-3">
-                      <p className="text-sm font-semibold mb-2">
-                        Extras:
-                      </p>
-                      {extras.map((topping, i) => (
-                        <label
-                          className="pl-2 flex items-center space-x-3 cursor-pointer"
+              </div>
+
+              {/* Options Content - Scrollable with better spacing */}
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-white pb-6">
+                {/* Size/Options Selection */}
+                {selectedProduct.options.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-white rounded-xl p-4 border border-gray-100"
+                  >
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="w-1 h-5 bg-primary rounded-full" />
+                      <h3 className="text-base md:text-lg font-bold text-gray-900">
+                        {selectedProduct.optionsTitle || "Größe wählen"}
+                      </h3>
+                    </div>
+                    <div className="space-y-2.5">
+                      {selectedProduct.options.map((option, i) => (
+                        <motion.label
                           key={i}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all duration-300 ${
+                            selectedOption === option
+                              ? "bg-primary/5 border-2 border-primary"
+                              : "bg-gray-50 border-2 border-transparent hover:border-gray-200 active:bg-gray-100"
+                          }`}
                         >
-                          <input
-                            type="checkbox"
-                            className="text-primary focus:ring-[#E53935]"
-                            checked={selectedToppings.some(
-                              (item) => item.name === topping.name
-                            )}
-                            onChange={() => handleToppingsChange(topping)}
-                          />
-                          <div className="flex items-center space-x-2">
-                            <p className="text-sm">{topping.name}</p>
-                            <span className="text-xs text-gray-500">
-                              {topping.price.toFixed(2)} €
+                          <div className="flex items-center space-x-3">
+                            <input
+                              checked={selectedOption === option}
+                              onChange={() => handleOptionChange(option)}
+                              className="w-4 h-4 md:w-5 md:h-5 text-primary focus:ring-primary focus:ring-2"
+                              type="radio"
+                              name="productOption"
+                            />
+                            <span className="font-semibold text-sm md:text-base text-gray-800">
+                              {option.size}
                             </span>
                           </div>
-                        </label>
+                          <span className="text-gray-600 font-semibold text-sm md:text-base">
+                            {option.price.toFixed(2)} €
+                          </span>
+                        </motion.label>
                       ))}
-
-                      {/* {extras.map((topping, i) => (
-                <div className="pl-2 flex items-center space-x-3" key={i}>
-                  <input
-                    type="checkbox"
-                    className="text-primary focus:ring-[#E53935] cursor-pointer"
-                    checked={selectedToppings.some(
-                      (item) => item.name === topping.name
-                    )}
-                    onChange={() => handleToppingsChange(topping)}
-                  />
-                  <p className="text-sm">{topping.name}</p>
-                  <span className="text-xs text-gray-500">
-                    {topping.price.toFixed(2)} €
-                  </span>
-                </div>
-              ))} */}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
-            {selectedProduct.options.length > 0 && (
-              <div className="flex items-center justify-between space-x-5 mt-10">
-                <div className="flex items-center gap-5">
-                  <button
-                    onClick={() =>
-                      dispatch(setQuantity(Math.max(1, quantity - 1)))
-                    }
-                    className="px-4 py-2 bg-gray-200 text-2xl rounded-full focus:outline-none"
+                  </motion.div>
+                )}
+
+                {/* Extras Selection */}
+                {extras.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-white rounded-xl p-4 border border-gray-100"
                   >
-                    -
-                  </button>
-                  <p className="font-medium text-lg">{quantity}</p>
-                  <button
-                    onClick={() => dispatch(setQuantity(quantity + 1))}
-                    className="px-4 py-2 bg-gray-200 text-2xl rounded-full focus:outline-none"
-                  >
-                    +
-                  </button>
-                </div>
-                <button
-                  onClick={handleAddToBasket}
-                  className="flex-1 bg-primary text-white font-semibold py-2 px-4 rounded-full text-2xl shadow"
-                >
-                  {totalPrice.toFixed(2)} €
-                </button>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="w-1 h-5 bg-primary rounded-full" />
+                      <h3 className="text-base md:text-lg font-bold text-gray-900">
+                        Extras hinzufügen
+                      </h3>
+                    </div>
+                    <div className="space-y-2.5">
+                      {extras.map((topping, i) => (
+                        <motion.label
+                          key={i}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all duration-300 ${
+                            selectedToppings.some(
+                              (item) => item.name === topping.name
+                            )
+                              ? "bg-primary/5 border-2 border-primary"
+                              : "bg-gray-50 border-2 border-transparent hover:border-gray-200 active:bg-gray-100"
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 md:w-5 md:h-5 text-primary focus:ring-primary focus:ring-2 rounded"
+                              checked={selectedToppings.some(
+                                (item) => item.name === topping.name
+                              )}
+                              onChange={() => handleToppingsChange(topping)}
+                            />
+                            <span className="font-semibold text-sm md:text-base text-gray-800">
+                              {topping.name}
+                            </span>
+                          </div>
+                          <span className="text-gray-600 font-semibold text-sm md:text-base">
+                            +{topping.price.toFixed(2)} €
+                          </span>
+                        </motion.label>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
               </div>
-            )}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </div>
+
+              {/* Footer with Quantity and Add Button - Fixed at bottom with nice padding */}
+              {selectedProduct.options.length > 0 && (
+                <div className="border-t border-gray-100 bg-white p-5 md:p-6 flex-shrink-0 safe-area-bottom">
+                  <div className="flex items-center justify-between space-x-3 md:space-x-4 mb-3">
+                    {/* Quantity Selector */}
+                    <div className="flex items-center space-x-2 md:space-x-3 bg-gray-50 rounded-full p-1 border border-gray-100">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() =>
+                          dispatch(setQuantity(Math.max(1, quantity - 1)))
+                        }
+                        className="w-10 h-10 md:w-11 md:h-11 bg-white rounded-full font-bold text-gray-700 hover:bg-primary hover:text-white transition-all duration-300 flex items-center justify-center border border-gray-100 text-lg"
+                      >
+                        -
+                      </motion.button>
+                      <span className="font-bold text-base md:text-lg w-8 text-center text-gray-900">
+                        {quantity}
+                      </span>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => dispatch(setQuantity(quantity + 1))}
+                        className="w-10 h-10 md:w-11 md:h-11 bg-white rounded-full font-bold text-gray-700 hover:bg-primary hover:text-white transition-all duration-300 flex items-center justify-center border border-gray-100 text-lg"
+                      >
+                        +
+                      </motion.button>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={handleAddToBasket}
+                      className="flex-1 bg-primary hover:bg-red-600 text-white font-bold py-3.5 md:py-4 px-4 md:px-6 rounded-full transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                        className="w-5 h-5 md:w-6 md:h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                        />
+                      </svg>
+                      <span className="text-base md:text-lg font-semibold">
+                        <span className="hidden sm:inline">Hinzufügen • </span>
+                        {totalPrice.toFixed(2)} €
+                      </span>
+                    </motion.button>
+                  </div>
+                  {/* Optional Helper Text - Low Opacity */}
+                  <p className="text-xs text-center text-gray-400 mt-1 opacity-40">
+                    Wählen Sie Ihre Optionen und fügen Sie sie dem Warenkorb
+                    hinzu
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 
   // return (
   //   <>
   //     {isLoadingComplete ? (
-    
+
   //     ) : (
   //       <LoadingPage setLoadingComplete={handleLoadingComplete} />
   //     )}
